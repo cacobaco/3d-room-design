@@ -191,7 +191,7 @@ document
  *
  * @returns {Primitive} The primitive object.
  *
- * @throws If a primitive with the same id already exists. Thrown by parsePrimitive.
+ * @throws If a primitive with the same id already exists. Thrown by {@link parsePrimitive}.
  */
 function getFormPrimitive() {
   const id = document.getElementById("primitiveId").value;
