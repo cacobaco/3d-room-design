@@ -93,8 +93,10 @@
       </form>
       <form id="manipulateObjectForm" class="d-flex flex-column align-items-center justify-content-center">
         <div class="pt-4" style="border-top: 2px solid rgb(215, 214, 214); width: 200%;"></div>
+
         <select id="manipulableObjectId" class="form-select mb-3">
           <option value="" selected>Selecione um objeto</option>
+
         </select>
         <button type="submit" class="btn btn-primary">Manipular Objeto</button>
       </form>
@@ -113,20 +115,15 @@
           <input class="form-control mx-1" type="number" id="lightDirZ" name="lightDirZ" placeholder="DirZ" required style="width: 90px;" value="255">
         </div>
         <div class="d-flex justify-content-evenly mt-2">
-          <input class="form-control mx-1" type="number" id="lightColorR" name="lightColorR" placeholder="R" required style="width: 90px;" value="255">
-          <input class="form-control mx-1" type="number" id="lightColorG" name="lightColorG" placeholder="G" required style="width: 90px;" value="255">
-          <input class="form-control mx-1" type="number" id="lightColorB" name="lightColorB" placeholder="B" required style="width: 90px;" value="255">
+          <input class="form-control mx-1" type="number" id="lightColorR" name="lightColorR" placeholder="R" required style="width: 90px;" value="255" min="0" max="255">
+          <input class="form-control mx-1" type="number" id="lightColorG" name="lightColorG" placeholder="G" required style="width: 90px;" value="255" min="0" max="255">
+          <input class="form-control mx-1" type="number" id="lightColorB" name="lightColorB" placeholder="B" required style="width: 90px;" value="255" min="0" max="255">
         </div>
         <button type="submit" class="btn btn-primary mt-2 mb-2">Adicionar Luz</button>
       </form>
-      <form id="removeLightForm" class="d-flex flex-column align-items-center justify-content-center">
+      <form id="resetLightForm" class="d-flex flex-column align-items-center justify-content-center">
         <div class="pt-2" style="border-top: 2px solid rgb(215, 214, 214); width: 200%;"></div>
-        <select class="form-select mb-2">
-          <option value="Luz1">Luz1</option>
-          <option value="Luz2">Luz2</option>
-          <option value="Luz3">Luz3</option>
-        </select>
-        <button type="submit" class="btn btn-primary mb-2">Remover Luz</button>
+        <button type="submit" class="btn btn-primary mb-2">Resetar Luz</button>
       </form>
     </div>
   </div>
