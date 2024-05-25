@@ -160,6 +160,7 @@ document.getElementById("gl-canvas").addEventListener("click", () => {
  * @property {string} attributeValue - The value of the attribute.
  */
 
+const maxPrimitives = 10;
 const meshes = {};
 
 document
@@ -167,12 +168,21 @@ document
   .addEventListener("submit", (event) => {
     event.preventDefault();
 
+    const count = Object.keys(meshes).length;
+
+    if (count >= maxPrimitives) {
+      showErrorModal(
+        "Erro",
+        `O número máximo de primitivas foi atingido (${count}/${maxPrimitives}).`
+      );
+      return;
+    }
+
     try {
       const primitive = getFormPrimitive();
       createPrimitive(primitive);
     } catch (error) {
-      document.getElementById("errorModalMessage").textContent = error.message;
-      $("#errorModal").modal("show");
+      showErrorModal("Erro", error.message);
     }
   });
 
