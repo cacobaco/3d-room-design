@@ -151,7 +151,7 @@ document
     createPrimitive(primitive);
   });
 
-const getFormPrimitive = () => {
+function getFormPrimitive() {
   const type = document.getElementById("primitiveType").value;
   const height = document.getElementById("primitiveHeight").value;
   const width = document.getElementById("primitiveWidth").value;
@@ -173,9 +173,9 @@ const getFormPrimitive = () => {
   });
 
   return primitive;
-};
+}
 
-const parsePrimitive = (primitive) => {
+function parsePrimitive(primitive) {
   const { type, height, width, depth, attribute, attributeValue } = primitive;
 
   let primitiveType = type === "pyramid" ? "pyramid" : "box";
@@ -188,31 +188,26 @@ const parsePrimitive = (primitive) => {
     attribute,
     attributeValue,
   };
-};
+}
 
-const createPrimitive = (primitive) => {
+function createPrimitive(primitive) {
   const geometry = getPrimitiveGeometry(primitive);
   const material = getPrimitiveMaterial(primitive);
   const mesh = new THREE.Mesh(geometry, material);
 
   mesh.position.set(0, primitive.height / 2, 0);
   scene.add(mesh);
-  primitives.push(mesh);
-};
+}
 
-const getPrimitiveGeometry = (primitive) => {
-  const { type, height, width, depth } = primitive;
-
+function getPrimitiveGeometry({ type, height, width, depth }) {
   if (type === "pyramid") {
     return new THREE.ConeGeometry(width, height, 4);
   }
 
   return new THREE.BoxGeometry(width, height, depth);
-};
+}
 
-const getPrimitiveMaterial = (primitive) => {
-  const { attribute, attributeValue } = primitive;
-
+function getPrimitiveMaterial({ attribute, attributeValue }) {
   if (attribute === "texture") {
     const texture = new THREE.TextureLoader().load(
       `../textures/${attributeValue}`
@@ -221,7 +216,7 @@ const getPrimitiveMaterial = (primitive) => {
   }
 
   return new THREE.MeshBasicMaterial({ color: attributeValue });
-};
+}
 
 // Função de animação
 function animate() {
