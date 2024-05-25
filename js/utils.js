@@ -29,22 +29,3 @@ function showErrorModal(title, message) {
 function hideErrorModal() {
   $("#errorModal").modal("hide");
 }
-
-function updateSelectOptions() {
-  const ids = Object.values(meshes).map(mesh => mesh.id);
-  console.log('IDs:', ids);
-
-  const select = document.getElementById('objectSelect');
-
-  ids.forEach(id => {
-    const option = document.createElement('option');
-    option.value = id;
-    option.textContent = id;
-    select.appendChild(option);
-  });
-}
-
-document.addEventListener('DOMContentLoaded', (event) => {
-  updateSelectOptions();
-});
-
