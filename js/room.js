@@ -88,7 +88,6 @@ const keysPressed = {};
 // Event listeners para teclas
 window.addEventListener("keydown", (event) => {
   keysPressed[event.key] = true;
-  console.log(keysPressed);
 });
 
 window.addEventListener("keyup", (event) => {
@@ -140,8 +139,21 @@ document.getElementById("gl-canvas").addEventListener("click", () => {
   document.body.requestPointerLock();
 });
 
-// Primitives
-const primitives = [];
+// **************
+// * PRIMITIVES *
+// **************
+/**
+ * @typedef {Object} Primitive
+ *
+ * @property {string} type - The type of primitive.
+ * @property {number} height - The height of the primitive.
+ * @property {number} width - The width of the primitive.
+ * @property {number} depth - The depth of the primitive.
+ * @property {string} attribute - The attribute of the primitive.
+ * @property {string} attributeValue - The value of the attribute.
+ */
+
+const meshes = [];
 
 document
   .getElementById("addPrimitiveForm")
@@ -152,19 +164,50 @@ document
     createPrimitive(primitive);
   });
 
-const getFormPrimitive = () => {
+/**
+ * Retrieves form inputs and returns a primitive object based on the input values.
+ *
+ * @returns {Primitive} The primitive object.
+ */
+function getFormPrimitive() {
   const type = document.getElementById("primitiveType").value;
   const height = document.getElementById("primitiveHeight").value;
   const width = document.getElementById("primitiveWidth").value;
   const depth = document.getElementById("primitiveDepth").value;
+  const attribute = document.getElementById("primitiveAttribute").value;
 
-  const primitive = parsePrimitive({ type, height, width, depth });
+  const attributeValue =
+    attribute === "texture"
+      ? document.getElementById("primitiveTexture").value
+      : document.getElementById("primitiveColor").value;
+
+  const primitive = parsePrimitive({
+    type,
+    height,
+    width,
+    depth,
+    attribute,
+    attributeValue,
+  });
 
   return primitive;
-};
+}
 
-const parsePrimitive = (primitive) => {
-  const { type, height, width, depth } = primitive;
+/**
+ * Parses a primitive object and returns a standardized representation.
+ *
+ * @param {Object} primitive - The primitive object.
+ * @param {string} primitive.type - The type of primitive.
+ * @param {string} primitive.height - The height of the primitive.
+ * @param {string} primitive.width - The width of the primitive.
+ * @param {string} primitive.depth - The depth of the primitive.
+ * @param {string} primitive.attribute - The attribute of the primitive.
+ * @param {string} primitive.attributeValue - The value of the attribute.
+ *
+ * @returns {Primitive} The parsed primitive object.
+ */
+function parsePrimitive(primitive) {
+  const { type, height, width, depth, attribute, attributeValue } = primitive;
 
   let primitiveType = type === "pyramid" ? "pyramid" : "box";
 
@@ -173,30 +216,64 @@ const parsePrimitive = (primitive) => {
     height: parseFloat(height) || 1,
     width: parseFloat(width) || 1,
     depth: parseFloat(depth) || 1,
+    attribute,
+    attributeValue,
   };
-};
+}
 
-const createPrimitive = (primitive) => {
+/**
+ * Creates a primitive and adds it to the scene.
+ *
+ * @param {Primitive} primitive - The primitive object.
+ */
+function createPrimitive(primitive) {
   const geometry = getPrimitiveGeometry(primitive);
-  const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+  const material = getPrimitiveMaterial(primitive);
   const mesh = new THREE.Mesh(geometry, material);
 
   mesh.position.set(0, primitive.height / 2, 0);
   scene.add(mesh);
-  primitives.push(mesh);
-};
+  meshes.push(mesh);
+}
 
-const getPrimitiveGeometry = (primitive) => {
-  const { type, height, width, depth } = primitive;
-
-  switch (type) {
-    case "pyramid":
-      return new THREE.ConeGeometry(width, height, 4);
-    case "box":
-    default:
-      return new THREE.BoxGeometry(width, height, depth);
+/**
+ * Returns a primitive geometry based on the provided parameters.
+ *
+ * @param {Object} params - The parameters for creating the geometry.
+ * @param {string} params.type - The type of geometry ("pyramid" or any other value for a box).
+ * @param {number} params.height - The height of the geometry.
+ * @param {number} params.width - The width of the geometry.
+ * @param {number} params.depth - The depth of the geometry (only applicable for box type).
+ *
+ * @returns {THREE.Geometry} - The primitive geometry.
+ */
+function getPrimitiveGeometry({ type, height, width, depth }) {
+  if (type === "pyramid") {
+    return new THREE.ConeGeometry(width, height, 4);
   }
-};
+
+  return new THREE.BoxGeometry(width, height, depth);
+}
+
+/**
+ * Returns a primitive material based on the provided attribute and attribute value.
+ *
+ * @param {Object} params - The parameters for creating the material.
+ * @param {string} params.attribute - The attribute of the primitive.
+ * @param {string} params.attributeValue - The value of the attribute.
+ *
+ * @returns {THREE.MeshBasicMaterial} - The primitive material.
+ */
+function getPrimitiveMaterial({ attribute, attributeValue }) {
+  if (attribute === "texture") {
+    const texture = new THREE.TextureLoader().load(
+      `../textures/${attributeValue}`
+    );
+    return new THREE.MeshBasicMaterial({ map: texture });
+  }
+
+  return new THREE.MeshBasicMaterial({ color: attributeValue });
+}
 
 // Função de animação
 function animate() {
