@@ -145,6 +145,7 @@ document.getElementById("gl-canvas").addEventListener("click", () => {
 /**
  * @typedef {Object} Primitive
  *
+ * @property {string} id - The unique identifier of the primitive.
  * @property {string} type - The type of primitive.
  * @property {number} height - The height of the primitive.
  * @property {number} width - The width of the primitive.
@@ -153,23 +154,31 @@ document.getElementById("gl-canvas").addEventListener("click", () => {
  * @property {string} attributeValue - The value of the attribute.
  */
 
-const meshes = [];
+const meshes = {};
 
 document
   .getElementById("addPrimitiveForm")
   .addEventListener("submit", (event) => {
     event.preventDefault();
 
-    const primitive = getFormPrimitive();
-    createPrimitive(primitive);
+    try {
+      const primitive = getFormPrimitive();
+      createPrimitive(primitive);
+    } catch (error) {
+      document.getElementById("errorModalMessage").textContent = error.message;
+      $("#errorModal").modal("show");
+    }
   });
 
 /**
  * Retrieves form inputs and returns a primitive object based on the input values.
  *
  * @returns {Primitive} The primitive object.
+ *
+ * @throws If a primitive with the same id already exists. Thrown by parsePrimitive.
  */
 function getFormPrimitive() {
+  const id = document.getElementById("primitiveId").value;
   const type = document.getElementById("primitiveType").value;
   const height = document.getElementById("primitiveHeight").value;
   const width = document.getElementById("primitiveWidth").value;
@@ -182,6 +191,7 @@ function getFormPrimitive() {
       : document.getElementById("primitiveColor").value;
 
   const primitive = parsePrimitive({
+    id,
     type,
     height,
     width,
@@ -197,6 +207,7 @@ function getFormPrimitive() {
  * Parses a primitive object and returns a standardized representation.
  *
  * @param {Object} primitive - The primitive object.
+ * @param {string} primitive.id - The unique identifier of the primitive.
  * @param {string} primitive.type - The type of primitive.
  * @param {string} primitive.height - The height of the primitive.
  * @param {string} primitive.width - The width of the primitive.
@@ -205,13 +216,21 @@ function getFormPrimitive() {
  * @param {string} primitive.attributeValue - The value of the attribute.
  *
  * @returns {Primitive} The parsed primitive object.
+ *
+ * @throws If a primitive with the same id already exists.
  */
 function parsePrimitive(primitive) {
-  const { type, height, width, depth, attribute, attributeValue } = primitive;
+  const { id, type, height, width, depth, attribute, attributeValue } =
+    primitive;
+
+  if (meshes[id]) {
+    throw new Error(`Já existe uma primitiva com o id "${id}".`);
+  }
 
   let primitiveType = type === "pyramid" ? "pyramid" : "box";
 
   return {
+    id,
     type: primitiveType,
     height: parseFloat(height) || 1,
     width: parseFloat(width) || 1,
@@ -223,6 +242,7 @@ function parsePrimitive(primitive) {
 
 /**
  * Creates a primitive and adds it to the scene.
+ * If a primitive with the same id already exists, it is replaced.
  *
  * @param {Primitive} primitive - The primitive object.
  */
@@ -231,9 +251,14 @@ function createPrimitive(primitive) {
   const material = getPrimitiveMaterial(primitive);
   const mesh = new THREE.Mesh(geometry, material);
 
+  if (meshes[primitive.id]) {
+    scene.remove(meshes[primitive.id]);
+    delete meshes[primitive.id];
+  }
+
   mesh.position.set(0, primitive.height / 2, 0);
   scene.add(mesh);
-  meshes.push(mesh);
+  meshes[primitive.id] = mesh;
 }
 
 /**
