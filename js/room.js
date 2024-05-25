@@ -139,8 +139,11 @@ document.getElementById("gl-canvas").addEventListener("click", () => {
   document.body.requestPointerLock();
 });
 
-// Primitives
-const primitives = [];
+// **************
+// * PRIMITIVES *
+// **************
+
+const meshes = [];
 
 document
   .getElementById("addPrimitiveForm")
@@ -197,6 +200,7 @@ function createPrimitive(primitive) {
 
   mesh.position.set(0, primitive.height / 2, 0);
   scene.add(mesh);
+  meshes.push(mesh);
 }
 
 function getPrimitiveGeometry({ type, height, width, depth }) {
