@@ -1,6 +1,11 @@
 import * as THREE from "three";
 import { PointerLockControls } from "three/addons/controls/PointerLockControls.js";
 
+import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
+
+const loader = new OBJLoader();
+
+
 // Criar cena, câmera e renderizador
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, 800 / 800, 0.1, 1000);
@@ -46,6 +51,76 @@ camera.lookAt(0, 5, 0);
 // Variáveis para controle de movimento
 let moveSpeed = 0.1;
 const keysPressed = {};
+
+
+/*loader.load(
+    // resource URL
+    '../modelos/bird.obj',
+    // called when resource is loaded
+    function ( object ) {
+      scene.add( object );
+      object.scale.set(0.05, 0.05, 0.05);
+      object.position.set(0, 2, 0);
+      object.rotation.x = THREE.MathUtils.degToRad(90); // Rotation around the X-axis
+      object.rotation.y = THREE.MathUtils.degToRad(180); // Rotation around the Y-axis
+      object.rotation.z = THREE.MathUtils.degToRad(180); // Rotation around the Z-axis
+    },
+    // called when loading is in progresses
+    function ( xhr ) {
+      console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+    },
+    // called when loading has errors
+    function ( error ) {
+      console.log( 'An error happened' );
+    }
+);*/
+// Get the form and the file input
+var form = document.getElementById('addModel');
+var fileInput = document.getElementById('file');
+
+form.addEventListener('submit', function(event) {
+  // Prevent the form from submitting normally
+  event.preventDefault();
+
+  // Get the file from the file input
+  var file = fileInput.files[0];
+
+  // Create a FileReader to read the file
+  var reader = new FileReader();
+
+  reader.addEventListener('load', function(event) {
+    // Parse the file content and load the model
+    var contents = event.target.result;
+    var object = loader.parse(contents);
+
+    // Calculate the bounding box of the model
+    var boundingBox = new THREE.Box3().setFromObject(object);
+
+    // Calculate the size of the bounding box
+    var modelSize = boundingBox.getSize(new THREE.Vector3());
+    console.log('Model size:', modelSize);
+
+    // Define the size of the room
+    var roomSize = new THREE.Vector3(10, 10, 10); // Replace with the actual size of your room
+    console.log('Room size:', roomSize);
+
+    // Calculate the scale factor
+    var scaleFactor = Math.min(
+        roomSize.x / modelSize.x,
+        roomSize.y / modelSize.y,
+        roomSize.z / modelSize.z
+    );
+    console.log('Scale factor:', scaleFactor);
+    object.scale.set(scaleFactor, scaleFactor, scaleFactor);
+    // Add the model to the scene
+    scene.add(object);
+  });
+
+  // Read the file as text
+  reader.readAsText(file);
+});
+
+
 
 // Event listeners para teclas
 window.addEventListener("keydown", (event) => {
