@@ -150,6 +150,12 @@ document.getElementById("gl-canvas").addEventListener("click", () => {
  * @property {number} height - The height of the primitive.
  * @property {number} width - The width of the primitive.
  * @property {number} depth - The depth of the primitive.
+ * @property {number} x - The x-coordinate of the primitive.
+ * @property {number} y - The y-coordinate of the primitive.
+ * @property {number} z - The z-coordinate of the primitive.
+ * @property {number} rotationX - The x-axis rotation of the primitive.
+ * @property {number} rotationY - The y-axis rotation of the primitive.
+ * @property {number} rotationZ - The z-axis rotation of the primitive.
  * @property {string} attribute - The attribute of the primitive.
  * @property {string} attributeValue - The value of the attribute.
  */
@@ -180,11 +186,24 @@ document
 function getFormPrimitive() {
   const id = document.getElementById("primitiveId").value;
   const type = document.getElementById("primitiveType").value;
+
+  // Get the primitive dimensions
   const height = document.getElementById("primitiveHeight").value;
   const width = document.getElementById("primitiveWidth").value;
   const depth = document.getElementById("primitiveDepth").value;
-  const attribute = document.getElementById("primitiveAttribute").value;
 
+  // Get the primitive position
+  const x = document.getElementById("primitiveX").value;
+  const y = document.getElementById("primitiveY").value;
+  const z = document.getElementById("primitiveZ").value;
+
+  // Get the primitive rotation
+  const rotationX = document.getElementById("primitiveRotationX").value;
+  const rotationY = document.getElementById("primitiveRotationY").value;
+  const rotationZ = document.getElementById("primitiveRotationZ").value;
+
+  // Get the primitive attribute and value
+  const attribute = document.getElementById("primitiveAttribute").value;
   const attributeValue =
     attribute === "texture"
       ? document.getElementById("primitiveTexture").value
@@ -196,6 +215,12 @@ function getFormPrimitive() {
     height,
     width,
     depth,
+    x,
+    y,
+    z,
+    rotationX,
+    rotationY,
+    rotationZ,
     attribute,
     attributeValue,
   });
@@ -212,6 +237,12 @@ function getFormPrimitive() {
  * @param {string} primitive.height - The height of the primitive.
  * @param {string} primitive.width - The width of the primitive.
  * @param {string} primitive.depth - The depth of the primitive.
+ * @param {string} primitive.x - The x-coordinate of the primitive.
+ * @param {string} primitive.y - The y-coordinate of the primitive.
+ * @param {string} primitive.z - The z-coordinate of the primitive.
+ * @param {string} primitive.rotationX - The x-axis rotation of the primitive.
+ * @param {string} primitive.rotationY - The y-axis rotation of the primitive.
+ * @param {string} primitive.rotationZ - The z-axis rotation of the primitive.
  * @param {string} primitive.attribute - The attribute of the primitive.
  * @param {string} primitive.attributeValue - The value of the attribute.
  *
@@ -219,10 +250,21 @@ function getFormPrimitive() {
  *
  * @throws If a primitive with the same id already exists.
  */
-function parsePrimitive(primitive) {
-  const { id, type, height, width, depth, attribute, attributeValue } =
-    primitive;
-
+function parsePrimitive({
+  id,
+  type,
+  height,
+  width,
+  depth,
+  x,
+  y,
+  z,
+  rotationX,
+  rotationY,
+  rotationZ,
+  attribute,
+  attributeValue,
+}) {
   if (meshes[id]) {
     throw new Error(`Já existe uma primitiva com o id "${id}".`);
   }
@@ -235,6 +277,12 @@ function parsePrimitive(primitive) {
     height: parseFloat(height) || 1,
     width: parseFloat(width) || 1,
     depth: parseFloat(depth) || 1,
+    x: parseFloat(x) || 0,
+    y: parseFloat(y) || height / 2,
+    z: parseFloat(z) || 0,
+    rotationX: parseFloat(rotationX) || 0,
+    rotationY: parseFloat(rotationY) || 0,
+    rotationZ: parseFloat(rotationZ) || 0,
     attribute,
     attributeValue,
   };
@@ -247,16 +295,23 @@ function parsePrimitive(primitive) {
  * @param {Primitive} primitive - The primitive object.
  */
 function createPrimitive(primitive) {
-  const geometry = getPrimitiveGeometry(primitive);
-  const material = getPrimitiveMaterial(primitive);
-  const mesh = new THREE.Mesh(geometry, material);
-
   if (meshes[primitive.id]) {
     scene.remove(meshes[primitive.id]);
     delete meshes[primitive.id];
   }
 
-  mesh.position.set(0, primitive.height / 2, 0);
+  const geometry = getPrimitiveGeometry(primitive);
+  const material = getPrimitiveMaterial(primitive);
+  const mesh = new THREE.Mesh(geometry, material);
+
+  mesh.position.set(primitive.x, primitive.y, primitive.z);
+
+  mesh.rotation.set(
+    THREE.Math.degToRad(primitive.rotationX),
+    THREE.Math.degToRad(primitive.rotationY),
+    THREE.Math.degToRad(primitive.rotationZ)
+  );
+
   scene.add(mesh);
   meshes[primitive.id] = mesh;
 }
