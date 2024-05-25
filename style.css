@@ -1,14 +1,3 @@
-body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-}
-
-#gl-canvas {
-    display: block;
-}
-
 .menu {
     height: 82.5%;
     width: 25%;
@@ -16,8 +5,5 @@ body {
 }
 
 .menu-div {
-    margin-left: 20px;
     border-top: 2px solid rgb(215, 214, 214);
-    width: 100%;
-    height: 100%;
 }

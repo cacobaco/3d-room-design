@@ -12,13 +12,13 @@
         <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/PointerLockControls.js"></script>
         <link rel="stylesheet" href="style.css" />
     </head>
-    <body>
-        <canvas id="gl-canvas" width="800" height="800"></canvas>
+    <body class="d-flex justify-content-center align-items-center" style="height: 100vh;">
+        <canvas class="d-block" id="gl-canvas" width="800" height="800"></canvas>
         <script src="js/room.js"></script>
         <!--TODO: Colocar os formulários a funcionar -->
         <div class="d-flex flex-column justify-content-evenly align-items-center menu">
             <!--Aqui div de adicionar primitiva-->
-            <div class="menu-div d-flex flex-column align-items-center justify-content-center">
+            <div class="menu-div ms-3 d-flex flex-column align-items-center justify-content-center h-100 w-100">
                 <form id="addPrimitiveForm" class="d-flex flex-column align-items-center justify-content-center">
                     <div class="d-flex">
                         <select class="form-select mb-3">
@@ -31,15 +31,15 @@
                     <div class="d-flex justify-content-evenly">
                         <div>
                             <label for="lightPosition">Altura:</label>
-                            <input class="form-control mx-1" type="number" id="lightColorR" name="lightColorR" placeholder="R" required style="width: 70px;">
+                            <input class="form-control mx-1" type="number" id="colorR" name="lightColorR" placeholder="R" required style="width: 70px;">
                         </div>
                         <div>
                             <label for="lightPosition">Largura:</label>
-                            <input class="form-control mx-1" type="number" id="lightColorG" name="lightColorG" placeholder="G" required style="width: 70px;">
+                            <input class="form-control mx-1" type="number" id="colorG" name="lightColorG" placeholder="G" required style="width: 70px;">
                         </div>
                         <div>
                             <label for="lightPosition">Profundidade:</label>
-                            <input class="form-control mx-1" type="number" id="lightColorB" name="lightColorB" placeholder="B" required style="width: 70px;">
+                            <input class="form-control mx-1" type="number" id="colorB" name="lightColorB" placeholder="B" required style="width: 70px;">
                         </div>
                     </div>
                     <div class="d-flex mt-3">
@@ -87,7 +87,7 @@
                 </form>
             </div>
             <!--Aqui div de adicionar modelo e manipular objeto-->
-            <div class="menu-div d-flex flex-column align-items-center justify-content-evenly">
+            <div class="menu-div ms-3 d-flex flex-column align-items-center justify-content-evenly h-100 w-100">
                 <form id="addModel" class="d-flex flex-column align-items-center justify-content-center">
                     <input class="mb-3 form-control" type="file" id="file" name="file" accept=".obj">
                     <button type="submit" class="btn btn-primary mb-3">Adicionar Modelo</button>
@@ -104,7 +104,7 @@
                 </form>
             </div>
             <!--Aqui div de adicionar luz-->
-            <div class="menu-div d-flex flex-column align-items-center justify-content-center" style="border-bottom: 2px solid rgb(215, 214, 214);">
+            <div class="menu-div ms-3 d-flex flex-column align-items-center justify-content-center h-100 w-100" style="border-bottom: 2px solid rgb(215, 214, 214);">
                 <form id="addLight" class="d-flex flex-column align-items-center justify-content-center">
                     <label for="lightPosition">Posição:</label>
                     <div class="d-flex justify-content-evenly ">
