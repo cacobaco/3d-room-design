@@ -1,8 +1,11 @@
+import * as THREE from "three";
+import { PointerLockControls } from "three/addons/controls/PointerLockControls.js";
+
 // Criar cena, câmera e renderizador
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, 800 / 800, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer({
-    canvas: document.getElementById("gl-canvas"),
+  canvas: document.getElementById("gl-canvas"),
 });
 renderer.setSize(800, 800);
 
@@ -12,11 +15,11 @@ renderer.setClearColor(0x87ceeb);
 // Material para paredes e chão
 const wallTexture = new THREE.TextureLoader().load("../textures/wall.jpg");
 const wallMaterial = new THREE.MeshPhongMaterial({
-    map: wallTexture,
+  map: wallTexture,
 });
 const floorTexture = new THREE.TextureLoader().load("../textures/floor.jpg");
 const floorMaterial = new THREE.MeshPhongMaterial({
-    map: floorTexture,
+  map: floorTexture,
 });
 
 // Criar paredes
@@ -46,59 +49,58 @@ const keysPressed = {};
 
 // Event listeners para teclas
 window.addEventListener("keydown", (event) => {
-    keysPressed[event.key] = true;
+  keysPressed[event.key] = true;
 });
 
 window.addEventListener("keyup", (event) => {
-    keysPressed[event.key] = false;
+  keysPressed[event.key] = false;
 });
 
 // Controle de movimento WASD
 function updateCamera() {
-    if (keysPressed[" "]) {
-        moveSpeed = 0.5;
-    } else {
-        moveSpeed = 0.1;
-    }
+  if (keysPressed[" "]) {
+    moveSpeed = 0.5;
+  } else {
+    moveSpeed = 0.1;
+  }
 
-    if (keysPressed["w"]) {
-        controls.moveForward(moveSpeed);
-    }
-    if (keysPressed["s"]) {
-        controls.moveForward(-moveSpeed);
-    }
-    if (keysPressed["a"]) {
-        controls.moveRight(-moveSpeed);
-    }
-    if (keysPressed["d"]) {
-        controls.moveRight(moveSpeed);
-    }
-    if (keysPressed["q"]) {
-        camera.position.y += moveSpeed;
-    }
-    if (keysPressed["e"]) {
-        camera.position.y -= moveSpeed;
-    }
+  if (keysPressed["w"]) {
+    controls.moveForward(moveSpeed);
+  }
+  if (keysPressed["s"]) {
+    controls.moveForward(-moveSpeed);
+  }
+  if (keysPressed["a"]) {
+    controls.moveRight(-moveSpeed);
+  }
+  if (keysPressed["d"]) {
+    controls.moveRight(moveSpeed);
+  }
+  if (keysPressed["q"]) {
+    camera.position.y += moveSpeed;
+  }
+  if (keysPressed["e"]) {
+    camera.position.y -= moveSpeed;
+  }
 
-    requestAnimationFrame(updateCamera);
-
+  requestAnimationFrame(updateCamera);
 }
 updateCamera();
 
 // Usar PointerLockControls para navegação estilo FPS
-const controls = new THREE.PointerLockControls(camera, document.body);
+const controls = new PointerLockControls(camera, document.body);
 
 // Event listeners para controle de rotação com o mouse
 document.addEventListener("pointerlockchange", () => {
-    if (document.pointerLockElement === document.body) {
-        controls.enabled = true;
-    } else {
-        controls.enabled = false;
-    }
+  if (document.pointerLockElement === document.body) {
+    controls.enabled = true;
+  } else {
+    controls.enabled = false;
+  }
 });
 
 document.getElementById("gl-canvas").addEventListener("click", () => {
-    document.body.requestPointerLock();
+  document.body.requestPointerLock();
 });
 
 // ***********************
@@ -126,27 +128,27 @@ const maxPrimitives = 10;
 const meshes = {};
 
 document
-    .getElementById("addPrimitiveForm")
-    .addEventListener("submit", (event) => {
-        event.preventDefault();
+  .getElementById("addPrimitiveForm")
+  .addEventListener("submit", (event) => {
+    event.preventDefault();
 
-        const count = Object.keys(meshes).length;
+    const count = Object.keys(meshes).length;
 
-        if (count >= maxPrimitives) {
-            showErrorModal(
-                "Erro",
-                `O número máximo de primitivas foi atingido (${count}/${maxPrimitives}).`
-            );
-            return;
-        }
+    if (count >= maxPrimitives) {
+      showErrorModal(
+        "Erro",
+        `O número máximo de primitivas foi atingido (${count}/${maxPrimitives}).`
+      );
+      return;
+    }
 
-        try {
-            const primitive = getFormPrimitive();
-            createPrimitive(primitive);
-        } catch (error) {
-            showErrorModal("Erro", error.message);
-        }
-    });
+    try {
+      const primitive = getFormPrimitive();
+      createPrimitive(primitive);
+    } catch (error) {
+      showErrorModal("Erro", error.message);
+    }
+  });
 
 /**
  * Retrieves form inputs and returns a primitive object based on the input values.
@@ -156,48 +158,48 @@ document
  * @throws If a primitive with the same id already exists. Thrown by {@link parsePrimitive}.
  */
 function getFormPrimitive() {
-    const id = document.getElementById("primitiveId").value;
-    const type = document.getElementById("primitiveType").value;
+  const id = document.getElementById("primitiveId").value;
+  const type = document.getElementById("primitiveType").value;
 
-    // Get the primitive dimensions
-    const height = document.getElementById("primitiveHeight").value;
-    const width = document.getElementById("primitiveWidth").value;
-    const depth = document.getElementById("primitiveDepth").value;
+  // Get the primitive dimensions
+  const height = document.getElementById("primitiveHeight").value;
+  const width = document.getElementById("primitiveWidth").value;
+  const depth = document.getElementById("primitiveDepth").value;
 
-    // Get the primitive position
-    const x = document.getElementById("primitiveX").value;
-    const y = document.getElementById("primitiveY").value;
-    const z = document.getElementById("primitiveZ").value;
+  // Get the primitive position
+  const x = document.getElementById("primitiveX").value;
+  const y = document.getElementById("primitiveY").value;
+  const z = document.getElementById("primitiveZ").value;
 
-    // Get the primitive rotation
-    const rotationX = document.getElementById("primitiveRotationX").value;
-    const rotationY = document.getElementById("primitiveRotationY").value;
-    const rotationZ = document.getElementById("primitiveRotationZ").value;
+  // Get the primitive rotation
+  const rotationX = document.getElementById("primitiveRotationX").value;
+  const rotationY = document.getElementById("primitiveRotationY").value;
+  const rotationZ = document.getElementById("primitiveRotationZ").value;
 
-    // Get the primitive attribute and value
-    const attribute = document.getElementById("primitiveAttribute").value;
-    const attributeValue =
-        attribute === "texture"
-            ? document.getElementById("primitiveTexture").value
-            : document.getElementById("primitiveColor").value;
+  // Get the primitive attribute and value
+  const attribute = document.getElementById("primitiveAttribute").value;
+  const attributeValue =
+    attribute === "texture"
+      ? document.getElementById("primitiveTexture").value
+      : document.getElementById("primitiveColor").value;
 
-    const primitive = parsePrimitive({
-        id,
-        type,
-        height,
-        width,
-        depth,
-        x,
-        y,
-        z,
-        rotationX,
-        rotationY,
-        rotationZ,
-        attribute,
-        attributeValue,
-    });
+  const primitive = parsePrimitive({
+    id,
+    type,
+    height,
+    width,
+    depth,
+    x,
+    y,
+    z,
+    rotationX,
+    rotationY,
+    rotationZ,
+    attribute,
+    attributeValue,
+  });
 
-    return primitive;
+  return primitive;
 }
 
 /**
@@ -224,49 +226,48 @@ function getFormPrimitive() {
  * @throws If a primitive with the same id already exists.
  */
 function parsePrimitive({
+  id,
+  type,
+  height,
+  width,
+  depth,
+  x,
+  y,
+  z,
+  rotationX,
+  rotationY,
+  rotationZ,
+  attribute,
+  attributeValue,
+}) {
+  const parsedId = id.trim();
 
-    id,
-    type,
-    height,
-    width,
-    depth,
-    x,
-    y,
-    z,
-    rotationX,
-    rotationY,
-    rotationZ,
+  if (!parsedId) {
+    throw new Error("O campo 'ID' é obrigatório.");
+  }
+
+  if (meshes[parsedId]) {
+    throw new Error(`Já existe uma primitiva com o id "${parsedId}".`);
+  }
+
+  const parsedType = type === "pyramid" ? "pyramid" : "box";
+
+  return {
+    id: parsedId,
+    type: parsedType,
+    height: parseFloat(height) || 1,
+    width: parseFloat(width) || 1,
+    depth: parseFloat(depth) || 1,
+    x: parseFloat(x) || 0,
+    y: parseFloat(y) || height / 2,
+    z: parseFloat(z) || 0,
+    rotationX: parseFloat(rotationX) || 0,
+    rotationY: parseFloat(rotationY) || 0,
+    rotationZ: parseFloat(rotationZ) || 0,
+
     attribute,
     attributeValue,
-}) {
-    const parsedId = id.trim();
-
-    if (!parsedId) {
-        throw new Error("O campo 'ID' é obrigatório.");
-    }
-
-    if (meshes[parsedId]) {
-        throw new Error(`Já existe uma primitiva com o id "${parsedId}".`);
-    }
-
-    const parsedType = type === "pyramid" ? "pyramid" : "box";
-
-    return ({
-        id: parsedId,
-        type: parsedType,
-        height: parseFloat(height) || 1,
-        width: parseFloat(width) || 1,
-        depth: parseFloat(depth) || 1,
-        x: parseFloat(x) || 0,
-        y: parseFloat(y) || height / 2,
-        z: parseFloat(z) || 0,
-        rotationX: parseFloat(rotationX) || 0,
-        rotationY: parseFloat(rotationY) || 0,
-        rotationZ: parseFloat(rotationZ) || 0,
-
-        attribute,
-        attributeValue,
-    });
+  };
 }
 
 /**
@@ -276,31 +277,27 @@ function parsePrimitive({
  * @param {Primitive} primitive - The primitive object.
  */
 function createPrimitive(primitive) {
+  if (meshes[primitive.id]) {
+    removeManipulableObjectOption(primitive.id);
+    scene.remove(meshes[primitive.id]);
+    delete meshes[primitive.id];
+  }
 
-    if (meshes[primitive.id]) {
-        removeManipulableObjectOption(primitive.id);
-        scene.remove(meshes[primitive.id]);
-        delete meshes[primitive.id];
-    }
+  const geometry = getPrimitiveGeometry(primitive);
+  const material = getPrimitiveMaterial(primitive);
+  const mesh = new THREE.Mesh(geometry, material);
 
+  mesh.position.set(primitive.x, primitive.y, primitive.z);
 
-    const geometry = getPrimitiveGeometry(primitive);
-    const material = getPrimitiveMaterial(primitive);
-    const mesh = new THREE.Mesh(geometry, material);
+  mesh.rotation.set(
+    THREE.MathUtils.degToRad(primitive.rotationX),
+    THREE.MathUtils.degToRad(primitive.rotationY),
+    THREE.MathUtils.degToRad(primitive.rotationZ)
+  );
 
-    mesh.position.set(primitive.x, primitive.y, primitive.z);
-
-    mesh.rotation.set(
-        THREE.Math.degToRad(primitive.rotationX),
-        THREE.Math.degToRad(primitive.rotationY),
-        THREE.Math.degToRad(primitive.rotationZ)
-    );
-
-
-    meshes[primitive.id] = mesh;
-    scene.add(mesh);
-    addManipulableObjectOption(primitive.id);
-
+  meshes[primitive.id] = mesh;
+  scene.add(mesh);
+  addManipulableObjectOption(primitive.id);
 }
 
 /**
@@ -315,11 +312,11 @@ function createPrimitive(primitive) {
  * @returns {THREE.Geometry} - The primitive geometry.
  */
 function getPrimitiveGeometry({ type, height, width, depth }) {
-    if (type === "pyramid") {
-        return new THREE.ConeGeometry(width, height, 4);
-    }
+  if (type === "pyramid") {
+    return new THREE.ConeGeometry(width, height, 4);
+  }
 
-    return new THREE.BoxGeometry(width, height, depth);
+  return new THREE.BoxGeometry(width, height, depth);
 }
 
 /**
@@ -332,14 +329,14 @@ function getPrimitiveGeometry({ type, height, width, depth }) {
  * @returns {THREE.MeshPhongMaterial} - The primitive material.
  */
 function getPrimitiveMaterial({ attribute, attributeValue }) {
-    if (attribute === "texture") {
-        const texture = new THREE.TextureLoader().load(
-            `../textures/${attributeValue}`
-        );
-        return new THREE.MeshPhongMaterial({ map: texture });
-    }
+  if (attribute === "texture") {
+    const texture = new THREE.TextureLoader().load(
+      `../textures/${attributeValue}`
+    );
+    return new THREE.MeshPhongMaterial({ map: texture });
+  }
 
-    return new THREE.MeshPhongMaterial({ color: attributeValue });
+  return new THREE.MeshPhongMaterial({ color: attributeValue });
 }
 
 // ***************************
@@ -348,90 +345,90 @@ function getPrimitiveMaterial({ attribute, attributeValue }) {
 let selectedMesh = null;
 
 document
-    .getElementById("manipulateObjectForm")
-    .addEventListener("submit", (event) => {
-        event.preventDefault();
+  .getElementById("manipulateObjectForm")
+  .addEventListener("submit", (event) => {
+    event.preventDefault();
 
-        const id = document.getElementById("manipulableObjectId").value;
+    const id = document.getElementById("manipulableObjectId").value;
 
-        if (!id) {
-            return;
-        }
+    if (!id) {
+      return;
+    }
 
-        if (!meshes[id]) {
-            showErrorModal("Erro", `Não existe uma primitiva com o id "${id}".`);
-            return;
-        }
+    if (!meshes[id]) {
+      showErrorModal("Erro", `Não existe uma primitiva com o id "${id}".`);
+      return;
+    }
 
-        selectObject(id);
-    });
+    selectObject(id);
+  });
 
 function updateSelectedObject() {
-    if (!selectedMesh) {
-        return;
-    }
+  if (!selectedMesh) {
+    return;
+  }
 
-    if (keysPressed["Enter"]) {
-        deselectObject();
-        return;
-    }
+  if (keysPressed["Enter"]) {
+    deselectObject();
+    return;
+  }
 
-    if (keysPressed["ArrowUp"]) {
-        selectedMesh.position.z -= 0.1;
-    }
-    if (keysPressed["ArrowDown"]) {
-        selectedMesh.position.z += 0.1;
-    }
-    if (keysPressed["ArrowLeft"]) {
-        selectedMesh.position.x -= 0.1;
-    }
-    if (keysPressed["ArrowRight"]) {
-        selectedMesh.position.x += 0.1;
-    }
-    if (keysPressed["PageUp"]) {
-        selectedMesh.position.y += 0.1;
-    }
-    if (keysPressed["PageDown"]) {
-        selectedMesh.position.y -= 0.1;
-    }
+  if (keysPressed["ArrowUp"]) {
+    selectedMesh.position.z -= 0.05;
+  }
+  if (keysPressed["ArrowDown"]) {
+    selectedMesh.position.z += 0.05;
+  }
+  if (keysPressed["ArrowLeft"]) {
+    selectedMesh.position.x -= 0.05;
+  }
+  if (keysPressed["ArrowRight"]) {
+    selectedMesh.position.x += 0.05;
+  }
+  if (keysPressed["PageUp"]) {
+    selectedMesh.position.y += 0.05;
+  }
+  if (keysPressed["PageDown"]) {
+    selectedMesh.position.y -= 0.05;
+  }
 
-    requestAnimationFrame(updateSelectedObject);
+  requestAnimationFrame(updateSelectedObject);
 }
 
 function selectObject(id) {
-    if (!meshes[id]) {
-        throw new Error(`Não existe uma primitiva com o id "${id}".`);
-    }
+  if (!meshes[id]) {
+    throw new Error(`Não existe uma primitiva com o id "${id}".`);
+  }
 
-    if (selectedMesh) {
-        deselectObject();
-    }
+  if (selectedMesh) {
+    deselectObject();
+  }
 
-    selectedMesh = meshes[id];
-    addBorder(selectedMesh);
+  selectedMesh = meshes[id];
+  addBorder(selectedMesh);
 
-    updateSelectedObject(id);
+  updateSelectedObject(id);
 }
 
 function deselectObject() {
-    if (!selectedMesh) {
-        return;
-    }
+  if (!selectedMesh) {
+    return;
+  }
 
-    removeBorder(selectedMesh);
-    selectedMesh = null;
+  removeBorder(selectedMesh);
+  selectedMesh = null;
 }
 
 function addBorder(mesh) {
-    const border = new THREE.LineSegments(
-        new THREE.EdgesGeometry(mesh.geometry),
-        new THREE.LineBasicMaterial({ color: "white" })
-    );
-    mesh.add(border);
+  const border = new THREE.LineSegments(
+    new THREE.EdgesGeometry(mesh.geometry),
+    new THREE.LineBasicMaterial({ color: "white" })
+  );
+  mesh.add(border);
 }
 
 function removeBorder(mesh) {
-    mesh.remove(mesh.children.find((child) => child.isLineSegments));
+  mesh.remove(mesh.children.find((child) => child.isLineSegments));
 }
 
 // **********
@@ -441,68 +438,69 @@ function removeBorder(mesh) {
 let currentLight = null;
 
 document.getElementById("addLightForm").addEventListener("submit", (event) => {
-    event.preventDefault();
-    scene.remove(currentLight);
-    const light = getFormLight();
-    createLight(light);
+  event.preventDefault();
+  scene.remove(currentLight);
+  const light = getFormLight();
+  createLight(light);
 });
 
-document.getElementById("resetLightForm").addEventListener("submit", (event) => {
+document
+  .getElementById("resetLightForm")
+  .addEventListener("submit", (event) => {
     event.preventDefault();
     scene.remove(currentLight);
-});
+  });
 
 function getFormLight() {
-    const posX = document.getElementById("lightPosX").value;
-    const posY = document.getElementById("lightPosY").value;
-    const posZ = document.getElementById("lightPosZ").value;
-    const dirX = document.getElementById("lightDirX").value;
-    const dirY = document.getElementById("lightDirY").value;
-    const dirZ = document.getElementById("lightDirZ").value;
-    const R = document.getElementById("lightColorR").value;
-    const G = document.getElementById("lightColorG").value;
-    const B = document.getElementById("lightColorB").value;
+  const posX = document.getElementById("lightPosX").value;
+  const posY = document.getElementById("lightPosY").value;
+  const posZ = document.getElementById("lightPosZ").value;
+  const dirX = document.getElementById("lightDirX").value;
+  const dirY = document.getElementById("lightDirY").value;
+  const dirZ = document.getElementById("lightDirZ").value;
+  const R = document.getElementById("lightColorR").value;
+  const G = document.getElementById("lightColorG").value;
+  const B = document.getElementById("lightColorB").value;
 
-    return {
-        posX,
-        posY,
-        posZ,
-        dirX,
-        dirY,
-        dirZ,
-        R,
-        G,
-        B,
-    };
+  return {
+    posX,
+    posY,
+    posZ,
+    dirX,
+    dirY,
+    dirZ,
+    R,
+    G,
+    B,
+  };
 }
 
 function parseLight({ posX, posY, posZ, dirX, dirY, dirZ, R, G, B }) {
-    return {
-        posX: parseFloat(posX) || 1,
-        posY: parseFloat(posY) || 1,
-        posZ: parseFloat(posZ) || 1,
-        dirX: parseFloat(dirX) || 1,
-        dirY: parseFloat(dirY) || 1,
-        dirZ: parseFloat(dirZ) || 1,
-        R: parseFloat(R) || 1,
-        G: parseFloat(G) || 1,
-        B: parseFloat(B) || 1,
-    };
+  return {
+    posX: parseFloat(posX) || 1,
+    posY: parseFloat(posY) || 1,
+    posZ: parseFloat(posZ) || 1,
+    dirX: parseFloat(dirX) || 1,
+    dirY: parseFloat(dirY) || 1,
+    dirZ: parseFloat(dirZ) || 1,
+    R: parseFloat(R) || 1,
+    G: parseFloat(G) || 1,
+    B: parseFloat(B) || 1,
+  };
 }
 
 function createLight({ posX, posY, posZ, dirX, dirY, dirZ, R, G, B }) {
-    const color = rgbToHex(R, G, B);
-    const directionalLight = new THREE.DirectionalLight(color, 1.4);
-    directionalLight.position.set(posX, posY, posZ).normalize();
-    directionalLight.lookAt(dirX, dirY, dirZ);
-    scene.add(directionalLight);
-    currentLight = directionalLight;
+  const color = rgbToHex(R, G, B);
+  const directionalLight = new THREE.DirectionalLight(color, 1.4);
+  directionalLight.position.set(posX, posY, posZ).normalize();
+  directionalLight.lookAt(dirX, dirY, dirZ);
+  scene.add(directionalLight);
+  currentLight = directionalLight;
 }
 
 // Função de animação
 function animate() {
-    requestAnimationFrame(animate);
-    renderer.render(scene, camera);
+  requestAnimationFrame(animate);
+  renderer.render(scene, camera);
 }
 animate();
-
