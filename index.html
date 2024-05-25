@@ -17,28 +17,46 @@
     <div class="menu-div ms-3 d-flex flex-column align-items-center justify-content-center h-100 w-100">
       <form id="addPrimitiveForm" class="d-flex flex-column align-items-center justify-content-center">
         <div class="d-flex">
-          <select class="form-select mb-3" id="primitiveType">
+          <select class="form-select mb-2" id="primitiveType">
             <option value="parallelepiped">Paralelipipedo</option>
             <option value="pyramid">Piramide quadrangular</option>
           </select>
-          <!--TODO: adicionar logica dos ids aqui-->
-          <h6 class="mx-3">ID: Par1</h6>
+          <input class="form-control mx-1" type="text" id="primitiveId" name="primitiveId" placeholder="ID" required style="width: 70px; height: 38px">
+        </div>
+        <div class="d-flex justify-content-evenly mb-2">
+          <div>
+            <input class="form-control mx-1" type="number" id="primitiveHeight" name="primitiveHeight" placeholder="Altura" required style="width: 90px;">
+          </div>
+          <div>
+            <input class="form-control mx-1" type="number" id="primitiveWidth" name="primitiveWidth" placeholder="Largura" required style="width: 90px;">
+          </div>
+          <div>
+            <input class="form-control mx-1" type="number" id="primitiveDepth" name="primitiveDepth" placeholder="Profundidade" required style="width: 90px;">
+          </div>
+        </div>
+        <div class="d-flex justify-content-evenly mb-2">
+            <div>
+              <input class="form-control mx-1" type="number" id="primitiveX" name="primitiveX" placeholder="PosX" required style="width: 90px;">
+            </div>
+            <div>
+              <input class="form-control mx-1" type="number" id="primitiveY" name="primitiveY" placeholder="PosY" required style="width: 90px;">
+            </div>
+            <div>
+              <input class="form-control mx-1" type="number" id="primitiveZ" name="primitiveZ" placeholder="PosZ" required style="width: 90px;">
+            </div>
         </div>
         <div class="d-flex justify-content-evenly">
-          <div>
-            <label for="primitiveHeight">Altura:</label>
-            <input class="form-control mx-1" type="number" id="primitiveHeight" name="primitiveHeight" placeholder="altura" required style="width: 70px;">
-          </div>
-          <div>
-            <label for="primitiveWidth">Largura:</label>
-            <input class="form-control mx-1" type="number" id="primitiveWidth" name="primitiveWidth" placeholder="largura" required style="width: 70px;">
-          </div>
-          <div>
-            <label for="primitiveDepth">Profundidade:</label>
-            <input class="form-control mx-1" type="number" id="primitiveDepth" name="primitiveDepth" placeholder="profundidade" required style="width: 70px;">
-          </div>
+            <div>
+                <input class="form-control mx-1" type="number" id="primitiveRotationX" name="primitiveRotationX" placeholder="RotX" required style="width: 90px;">
+            </div>
+            <div>
+                <input class="form-control mx-1" type="number" id="primitiveRotationY" name="primitiveRotationY" placeholder="RotY" required style="width: 90px;">
+            </div>
+            <div>
+                <input class="form-control mx-1" type="number" id="primitiveRotationZ" name="primitiveRotationZ" placeholder="RotZ" required style="width: 90px;">
+            </div>
         </div>
-        <div class="d-flex mt-3">
+        <div class="d-flex mt-2">
           <select id="primitiveAttribute" class="form-select mx-1">
             <option value="color">Cor</option>
             <option value="texture">Textura</option>
@@ -62,7 +80,7 @@
             <option value="slime.jpg">Slime</option>
           </select>
         </div>
-        <button type="submit" class="btn btn-primary mt-3">Adicionar Primitiva</button>
+        <button type="submit" class="btn btn-primary mt-2">Adicionar Primitiva</button>
       </form>
     </div>
     <!--Aqui div de adicionar modelo e manipular objeto-->
