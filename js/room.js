@@ -143,7 +143,6 @@ document
         try {
             const primitive = getFormPrimitive();
             createPrimitive(primitive);
-            updateSelectOptions();
         } catch (error) {
             showErrorModal("Erro", error.message);
         }
