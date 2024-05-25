@@ -2,24 +2,21 @@
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, 800 / 800, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer({
-    canvas: document.getElementById("gl-canvas"),
+  canvas: document.getElementById("gl-canvas"),
 });
 renderer.setSize(800, 800);
 
 // Configurar cor de fundo do renderizador
 renderer.setClearColor(0x87ceeb);
 
-
-
-
 // Material para paredes e chão
 const wallTexture = new THREE.TextureLoader().load("../textures/wall.jpg");
 const wallMaterial = new THREE.MeshPhongMaterial({
-    map: wallTexture,
+  map: wallTexture,
 });
 const floorTexture = new THREE.TextureLoader().load("../textures/floor.jpg");
 const floorMaterial = new THREE.MeshPhongMaterial({
-    map: floorTexture,
+  map: floorTexture,
 });
 
 // Criar paredes
@@ -32,15 +29,12 @@ wall2.position.set(-5, 5, 0);
 wall2.rotation.y = Math.PI / 2;
 scene.add(wall2);
 
-
 // Criar chão
 const floorGeometry = new THREE.PlaneGeometry(10, 10);
 const floor = new THREE.Mesh(floorGeometry, floorMaterial);
 floor.rotation.x = -Math.PI / 2;
 floor.position.set(0, 0, 0);
 scene.add(floor);
-
-
 
 // Configurar a posição inicial da câmera
 camera.position.set(5, 5, 15);
@@ -52,39 +46,39 @@ const keysPressed = {};
 
 // Event listeners para teclas
 window.addEventListener("keydown", (event) => {
-    keysPressed[event.key] = true;
+  keysPressed[event.key] = true;
 });
 
 window.addEventListener("keyup", (event) => {
-    keysPressed[event.key] = false;
+  keysPressed[event.key] = false;
 });
 
 // Controle de movimento WASD
 function updateCamera() {
-    if (keysPressed[" "]) {
-        moveSpeed = 0.5;
-    } else {
-        moveSpeed = 0.1;
-    }
-    if (keysPressed["w"]) {
-        controls.moveForward(moveSpeed);
-    }
-    if (keysPressed["s"]) {
-        controls.moveForward(-moveSpeed);
-    }
-    if (keysPressed["a"]) {
-        controls.moveRight(-moveSpeed);
-    }
-    if (keysPressed["d"]) {
-        controls.moveRight(moveSpeed);
-    }
-    if (keysPressed["q"]) {
-        camera.position.y += moveSpeed;
-    }
-    if (keysPressed["e"]) {
-        camera.position.y -= moveSpeed;
-    }
-    requestAnimationFrame(updateCamera);
+  if (keysPressed[" "]) {
+    moveSpeed = 0.5;
+  } else {
+    moveSpeed = 0.1;
+  }
+  if (keysPressed["w"]) {
+    controls.moveForward(moveSpeed);
+  }
+  if (keysPressed["s"]) {
+    controls.moveForward(-moveSpeed);
+  }
+  if (keysPressed["a"]) {
+    controls.moveRight(-moveSpeed);
+  }
+  if (keysPressed["d"]) {
+    controls.moveRight(moveSpeed);
+  }
+  if (keysPressed["q"]) {
+    camera.position.y += moveSpeed;
+  }
+  if (keysPressed["e"]) {
+    camera.position.y -= moveSpeed;
+  }
+  requestAnimationFrame(updateCamera);
 }
 updateCamera();
 
@@ -93,15 +87,15 @@ const controls = new THREE.PointerLockControls(camera, document.body);
 
 // Event listeners para controle de rotação com o mouse
 document.addEventListener("pointerlockchange", () => {
-    if (document.pointerLockElement === document.body) {
-        controls.enabled = true;
-    } else {
-        controls.enabled = false;
-    }
+  if (document.pointerLockElement === document.body) {
+    controls.enabled = true;
+  } else {
+    controls.enabled = false;
+  }
 });
 
 document.getElementById("gl-canvas").addEventListener("click", () => {
-    document.body.requestPointerLock();
+  document.body.requestPointerLock();
 });
 
 // **************
@@ -121,13 +115,13 @@ document.getElementById("gl-canvas").addEventListener("click", () => {
 const meshes = [];
 
 document
-    .getElementById("addPrimitiveForm")
-    .addEventListener("submit", (event) => {
-        event.preventDefault();
+  .getElementById("addPrimitiveForm")
+  .addEventListener("submit", (event) => {
+    event.preventDefault();
 
-        const primitive = getFormPrimitive();
-        createPrimitive(primitive);
-    });
+    const primitive = getFormPrimitive();
+    createPrimitive(primitive);
+  });
 
 /**
  * Retrieves form inputs and returns a primitive object based on the input values.
@@ -135,27 +129,27 @@ document
  * @returns {Primitive} The primitive object.
  */
 function getFormPrimitive() {
-    const type = document.getElementById("primitiveType").value;
-    const height = document.getElementById("primitiveHeight").value;
-    const width = document.getElementById("primitiveWidth").value;
-    const depth = document.getElementById("primitiveDepth").value;
-    const attribute = document.getElementById("primitiveAttribute").value;
+  const type = document.getElementById("primitiveType").value;
+  const height = document.getElementById("primitiveHeight").value;
+  const width = document.getElementById("primitiveWidth").value;
+  const depth = document.getElementById("primitiveDepth").value;
+  const attribute = document.getElementById("primitiveAttribute").value;
 
-    const attributeValue =
-        attribute === "texture"
-            ? document.getElementById("primitiveTexture").value
-            : document.getElementById("primitiveColor").value;
+  const attributeValue =
+    attribute === "texture"
+      ? document.getElementById("primitiveTexture").value
+      : document.getElementById("primitiveColor").value;
 
-    const primitive = parsePrimitive({
-        type,
-        height,
-        width,
-        depth,
-        attribute,
-        attributeValue,
-    });
+  const primitive = parsePrimitive({
+    type,
+    height,
+    width,
+    depth,
+    attribute,
+    attributeValue,
+  });
 
-    return primitive;
+  return primitive;
 }
 
 /**
@@ -172,18 +166,18 @@ function getFormPrimitive() {
  * @returns {Primitive} The parsed primitive object.
  */
 function parsePrimitive(primitive) {
-    const { type, height, width, depth, attribute, attributeValue } = primitive;
+  const { type, height, width, depth, attribute, attributeValue } = primitive;
 
-    let primitiveType = type === "pyramid" ? "pyramid" : "box";
+  let primitiveType = type === "pyramid" ? "pyramid" : "box";
 
-    return {
-        type: primitiveType,
-        height: parseFloat(height) || 1,
-        width: parseFloat(width) || 1,
-        depth: parseFloat(depth) || 1,
-        attribute,
-        attributeValue,
-    };
+  return {
+    type: primitiveType,
+    height: parseFloat(height) || 1,
+    width: parseFloat(width) || 1,
+    depth: parseFloat(depth) || 1,
+    attribute,
+    attributeValue,
+  };
 }
 
 /**
@@ -192,13 +186,13 @@ function parsePrimitive(primitive) {
  * @param {Primitive} primitive - The primitive object.
  */
 function createPrimitive(primitive) {
-    const geometry = getPrimitiveGeometry(primitive);
-    const material = getPrimitiveMaterial(primitive);
-    const mesh = new THREE.Mesh(geometry, material);
+  const geometry = getPrimitiveGeometry(primitive);
+  const material = getPrimitiveMaterial(primitive);
+  const mesh = new THREE.Mesh(geometry, material);
 
-    mesh.position.set(0, primitive.height / 2, 0);
-    scene.add(mesh);
-    meshes.push(mesh);
+  mesh.position.set(0, primitive.height / 2, 0);
+  scene.add(mesh);
+  meshes.push(mesh);
 }
 
 /**
@@ -213,11 +207,11 @@ function createPrimitive(primitive) {
  * @returns {THREE.Geometry} - The primitive geometry.
  */
 function getPrimitiveGeometry({ type, height, width, depth }) {
-    if (type === "pyramid") {
-        return new THREE.ConeGeometry(width, height, 4);
-    }
+  if (type === "pyramid") {
+    return new THREE.ConeGeometry(width, height, 4);
+  }
 
-    return new THREE.BoxGeometry(width, height, depth);
+  return new THREE.BoxGeometry(width, height, depth);
 }
 
 /**
@@ -230,86 +224,80 @@ function getPrimitiveGeometry({ type, height, width, depth }) {
  * @returns {THREE.MeshPhongMaterial} - The primitive material.
  */
 function getPrimitiveMaterial({ attribute, attributeValue }) {
-    if (attribute === "texture") {
-        const texture = new THREE.TextureLoader().load(
-            `../textures/${attributeValue}`
-        );
-        return new THREE.MeshPhongMaterial({ map: texture });
-    }
+  if (attribute === "texture") {
+    const texture = new THREE.TextureLoader().load(
+      `../textures/${attributeValue}`
+    );
+    return new THREE.MeshPhongMaterial({ map: texture });
+  }
 
-    return new THREE.MeshPhongMaterial({ color: attributeValue });
+  return new THREE.MeshPhongMaterial({ color: attributeValue });
 }
 
+document.getElementById("addLightForm").addEventListener("submit", (event) => {
+  event.preventDefault();
 
-document
-    .getElementById("addLightForm")
-    .addEventListener("submit", (event) => {
-        event.preventDefault();
-
-        const light = getFormLight();
-        createLight(light);
-    });
-
+  const light = getFormLight();
+  createLight(light);
+});
 
 function getFormLight() {
-    const posX = document.getElementById("lightPosX").value;
-    const posY = document.getElementById("lightPosY").value;
-    const posZ = document.getElementById("lightPosZ").value;
-    const dirX = document.getElementById("lightDirX").value;
-    const dirY = document.getElementById("lightDirY").value;
-    const dirZ = document.getElementById("lightDirZ").value;
-    const R = document.getElementById("lightColorR").value;
-    const G = document.getElementById("lightColorG").value;
-    const B = document.getElementById("lightColorB").value;
+  const posX = document.getElementById("lightPosX").value;
+  const posY = document.getElementById("lightPosY").value;
+  const posZ = document.getElementById("lightPosZ").value;
+  const dirX = document.getElementById("lightDirX").value;
+  const dirY = document.getElementById("lightDirY").value;
+  const dirZ = document.getElementById("lightDirZ").value;
+  const R = document.getElementById("lightColorR").value;
+  const G = document.getElementById("lightColorG").value;
+  const B = document.getElementById("lightColorB").value;
 
-    const light = parseLight({
-        posX,
-        posY,
-        posZ,
-        dirX,
-        dirY,
-        dirZ,
-        R,
-        G,
-        B,
-    });
+  const light = parseLight({
+    posX,
+    posY,
+    posZ,
+    dirX,
+    dirY,
+    dirZ,
+    R,
+    G,
+    B,
+  });
 
-    return light;
+  return light;
 }
 
 function parseLight(light) {
-    const { posX, posY, posZ, dirX, dirY, dirZ, R, G, B } = light;
+  const { posX, posY, posZ, dirX, dirY, dirZ, R, G, B } = light;
 
-    return {
-        posX: parseFloat(posX) || 1,
-        posY: parseFloat(posY) || 1,
-        posZ: parseFloat(posZ) || 1,
-        dirX: parseFloat(dirX) || 1,
-        dirY: parseFloat(dirY) || 1,
-        dirZ: parseFloat(dirZ) || 1,
-        R: parseFloat(R) || 1,
-        G: parseFloat(G) || 1,
-        B: parseFloat(B) || 1,
-    };
+  return {
+    posX: parseFloat(posX) || 1,
+    posY: parseFloat(posY) || 1,
+    posZ: parseFloat(posZ) || 1,
+    dirX: parseFloat(dirX) || 1,
+    dirY: parseFloat(dirY) || 1,
+    dirZ: parseFloat(dirZ) || 1,
+    R: parseFloat(R) || 1,
+    G: parseFloat(G) || 1,
+    B: parseFloat(B) || 1,
+  };
 }
 
 function createLight(light) {
-    const color = rgbToHex(light.R, light.G, light.B);
-    const directionalLight = new THREE.DirectionalLight(color, 1.4);
-    directionalLight.position.set(light.posX, light.posY, light.posZ).normalize();
-    directionalLight.lookAt(light.dirX, light.dirY, light.dirZ);
-    scene.add(directionalLight);
+  const color = rgbToHex(light.R, light.G, light.B);
+  const directionalLight = new THREE.DirectionalLight(color, 1.4);
+  directionalLight.position.set(light.posX, light.posY, light.posZ).normalize();
+  directionalLight.lookAt(light.dirX, light.dirY, light.dirZ);
+  scene.add(directionalLight);
 }
 
 function rgbToHex(r, g, b) {
-    return (r << 16) + (g << 8) + b;
+  return (r << 16) + (g << 8) + b;
 }
-
-
 
 // Função de animação
 function animate() {
-    requestAnimationFrame(animate);
-    renderer.render(scene, camera);
+  requestAnimationFrame(animate);
+  renderer.render(scene, camera);
 }
 animate();
