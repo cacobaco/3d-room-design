@@ -234,6 +234,10 @@ function getPrimitiveMaterial({ attribute, attributeValue }) {
   return new THREE.MeshPhongMaterial({ color: attributeValue });
 }
 
+// **********
+// * LIGHTS *
+// **********
+
 document.getElementById("addLightForm").addEventListener("submit", (event) => {
   event.preventDefault();
 
