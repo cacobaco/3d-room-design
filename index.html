@@ -91,9 +91,12 @@
         <input class="mb-3 form-control" type="file" id="file" name="file" accept=".obj">
         <button type="submit" class="btn btn-primary mb-3">Adicionar Modelo</button>
       </form>
-      <form id="manipulateObj" class="d-flex flex-column align-items-center justify-content-center">
+      <form id="manipulateObjectForm" class="d-flex flex-column align-items-center justify-content-center">
         <div class="pt-4" style="border-top: 2px solid rgb(215, 214, 214); width: 200%;"></div>
-        <select id="objectSelect" placeholder="Objetos" class="form-select mb-3">
+
+        <select id="manipulableObjectId" class="form-select mb-3">
+          <option value="" selected>Selecione um objeto</option>
+
         </select>
         <button type="submit" class="btn btn-primary">Manipular Objeto</button>
       </form>

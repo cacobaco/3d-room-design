@@ -55,30 +55,33 @@ window.addEventListener("keyup", (event) => {
 
 // Controle de movimento WASD
 function updateCamera() {
-    if (keysPressed[" "]) {
-        moveSpeed = 0.5;
-    } else {
-        moveSpeed = 0.1;
-    }
-    if (keysPressed["w"]) {
-        controls.moveForward(moveSpeed);
-    }
-    if (keysPressed["s"]) {
-        controls.moveForward(-moveSpeed);
-    }
-    if (keysPressed["a"]) {
-        controls.moveRight(-moveSpeed);
-    }
-    if (keysPressed["d"]) {
-        controls.moveRight(moveSpeed);
-    }
-    if (keysPressed["q"]) {
-        camera.position.y += moveSpeed;
-    }
-    if (keysPressed["e"]) {
-        camera.position.y -= moveSpeed;
-    }
-    requestAnimationFrame(updateCamera);
+  if (keysPressed[" "]) {
+    moveSpeed = 0.5;
+  } else {
+    moveSpeed = 0.1;
+  }
+
+  if (keysPressed["w"]) {
+    controls.moveForward(moveSpeed);
+  }
+  if (keysPressed["s"]) {
+    controls.moveForward(-moveSpeed);
+  }
+  if (keysPressed["a"]) {
+    controls.moveRight(-moveSpeed);
+  }
+  if (keysPressed["d"]) {
+    controls.moveRight(moveSpeed);
+  }
+  if (keysPressed["q"]) {
+    camera.position.y += moveSpeed;
+  }
+  if (keysPressed["e"]) {
+    camera.position.y -= moveSpeed;
+  }
+
+  requestAnimationFrame(updateCamera);
+
 }
 updateCamera();
 
@@ -98,9 +101,9 @@ document.getElementById("gl-canvas").addEventListener("click", () => {
     document.body.requestPointerLock();
 });
 
-// **************
-// * PRIMITIVES *
-// **************
+// ***********************
+// * PRIMITIVES CREATION *
+// ***********************
 /**
  * @typedef {Object} Primitive
  *
@@ -218,20 +221,50 @@ function getFormPrimitive() {
  *
  * @returns {Primitive} The parsed primitive object.
  *
+ * @throws If the id field is empty.
  * @throws If a primitive with the same id already exists.
  */
 function parsePrimitive({
-    id,
-    type,
-    height,
-    width,
-    depth,
-    x,
-    y,
-    z,
-    rotationX,
-    rotationY,
-    rotationZ,
+
+  id,
+  type,
+  height,
+  width,
+  depth,
+  x,
+  y,
+  z,
+  rotationX,
+  rotationY,
+  rotationZ,
+  attribute,
+  attributeValue,
+}) {
+  const parsedId = id.trim();
+
+  if (!parsedId) {
+    throw new Error("O campo 'ID' é obrigatório.");
+  }
+
+  if (meshes[parsedId]) {
+    throw new Error(`Já existe uma primitiva com o id "${parsedId}".`);
+  }
+
+  const parsedType = type === "pyramid" ? "pyramid" : "box";
+
+  return {
+    id: parsedId,
+    type: parsedType,
+    height: parseFloat(height) || 1,
+    width: parseFloat(width) || 1,
+    depth: parseFloat(depth) || 1,
+    x: parseFloat(x) || 0,
+    y: parseFloat(y) || height / 2,
+    z: parseFloat(z) || 0,
+    rotationX: parseFloat(rotationX) || 0,
+    rotationY: parseFloat(rotationY) || 0,
+    rotationZ: parseFloat(rotationZ) || 0,
+
     attribute,
     attributeValue,
 }) {
@@ -265,10 +298,13 @@ function parsePrimitive({
  * @param {Primitive} primitive - The primitive object.
  */
 function createPrimitive(primitive) {
-    if (meshes[primitive.id]) {
-        scene.remove(meshes[primitive.id]);
-        delete meshes[primitive.id];
-    }
+
+  if (meshes[primitive.id]) {
+    removeManipulableObjectOption(primitive.id);
+    scene.remove(meshes[primitive.id]);
+    delete meshes[primitive.id];
+  }
+
 
     const geometry = getPrimitiveGeometry(primitive);
     const material = getPrimitiveMaterial(primitive);
@@ -282,8 +318,11 @@ function createPrimitive(primitive) {
         THREE.Math.degToRad(primitive.rotationZ)
     );
 
-    scene.add(mesh);
-    meshes[primitive.id] = mesh;
+
+  meshes[primitive.id] = mesh;
+  scene.add(mesh);
+  addManipulableObjectOption(primitive.id);
+
 }
 
 /**
@@ -323,6 +362,98 @@ function getPrimitiveMaterial({ attribute, attributeValue }) {
     }
 
     return new THREE.MeshPhongMaterial({ color: attributeValue });
+}
+
+// ***************************
+// * PRIMITIVES MANIPULATION *
+// ***************************
+let selectedMesh = null;
+
+document
+  .getElementById("manipulateObjectForm")
+  .addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    const id = document.getElementById("manipulableObjectId").value;
+
+    if (!id) {
+      return;
+    }
+
+    if (!meshes[id]) {
+      showErrorModal("Erro", `Não existe uma primitiva com o id "${id}".`);
+      return;
+    }
+
+    selectObject(id);
+  });
+
+function updateSelectedObject() {
+  if (!selectedMesh) {
+    return;
+  }
+
+  if (keysPressed["Enter"]) {
+    deselectObject();
+    return;
+  }
+
+  if (keysPressed["ArrowUp"]) {
+    selectedMesh.position.z -= 0.1;
+  }
+  if (keysPressed["ArrowDown"]) {
+    selectedMesh.position.z += 0.1;
+  }
+  if (keysPressed["ArrowLeft"]) {
+    selectedMesh.position.x -= 0.1;
+  }
+  if (keysPressed["ArrowRight"]) {
+    selectedMesh.position.x += 0.1;
+  }
+  if (keysPressed["PageUp"]) {
+    selectedMesh.position.y += 0.1;
+  }
+  if (keysPressed["PageDown"]) {
+    selectedMesh.position.y -= 0.1;
+  }
+
+  requestAnimationFrame(updateSelectedObject);
+}
+
+function selectObject(id) {
+  if (!meshes[id]) {
+    throw new Error(`Não existe uma primitiva com o id "${id}".`);
+  }
+
+  if (selectedMesh) {
+    deselectObject();
+  }
+
+  selectedMesh = meshes[id];
+  addBorder(selectedMesh);
+
+  updateSelectedObject(id);
+}
+
+function deselectObject() {
+  if (!selectedMesh) {
+    return;
+  }
+
+  removeBorder(selectedMesh);
+  selectedMesh = null;
+}
+
+function addBorder(mesh) {
+  const border = new THREE.LineSegments(
+    new THREE.EdgesGeometry(mesh.geometry),
+    new THREE.LineBasicMaterial({ color: "white" })
+  );
+  mesh.add(border);
+}
+
+function removeBorder(mesh) {
+  mesh.remove(mesh.children.find((child) => child.isLineSegments));
 }
 
 // **********
