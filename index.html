@@ -1,134 +1,115 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>PA Room Design</title>
-        <link
-            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-            rel="stylesheet"
-            integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
-            crossorigin="anonymous"
-        />
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/PointerLockControls.js"></script>
-        <link rel="stylesheet" href="style.css" />
-    </head>
-    <body class="d-flex justify-content-center align-items-center" style="height: 100vh;">
-        <canvas class="d-block" id="gl-canvas" width="800" height="800"></canvas>
-        <script src="js/room.js"></script>
-        <!--TODO: Colocar os formulários a funcionar -->
-        <div class="d-flex flex-column justify-content-evenly align-items-center menu">
-            <!--Aqui div de adicionar primitiva-->
-            <div class="menu-div ms-3 d-flex flex-column align-items-center justify-content-center h-100 w-100">
-                <form id="addPrimitiveForm" class="d-flex flex-column align-items-center justify-content-center">
-                    <div class="d-flex">
-                        <select class="form-select mb-3" id="primitiveType">
-                            <option value="parallelepiped">Paralelipipedo</option>
-                            <option value="piramid">Piramide quadrangular</option>
-                        </select>
-                        <!--TODO: adicionar logica dos ids aqui-->
-                        <h6 class="mx-3">ID: Par1</h6>
-                    </div>
-                    <div class="d-flex justify-content-evenly">
-                        <div>
-                            <label for="primitiveHeight">Altura:</label>
-                            <input class="form-control mx-1" type="number" id="primitiveHeight" name="primitiveHeight" placeholder="altura" required style="width: 70px;">
-                        </div>
-                        <div>
-                            <label for="primitiveWidth">Largura:</label>
-                            <input class="form-control mx-1" type="number" id="primitiveWidth" name="primitiveWidth" placeholder="largura" required style="width: 70px;">
-                        </div>
-                        <div>
-                            <label for="primitiveDepth">Profundidade:</label>
-                            <input class="form-control mx-1" type="number" id="primitiveDepth" name="primitiveDepth" placeholder="profundidade" required style="width: 70px;">
-                        </div>
-                    </div>
-                    <div class="d-flex mt-3">
-                        <select id="typeSelect" class="form-select mx-1">
-                            <option value="color">Cor</option>
-                            <option value="texture">Textura</option>
-                        </select>
-                        <select id="colorSelect" class="form-select mx-1">
-                            <option value="red">Red</option>
-                            <option value="blue">Blue</option>
-                            <option value="yellow">Yellow</option>
-                            <option value="green">Green</option>
-                            <option value="orange">Orange</option>
-                            <option value="purple">Purple</option>
-                            <option value="cyan">Cyan</option>
-                            <option value="magenta">Magenta</option>
-                            <option value="lime">Lime</option>
-                            <option value="pink">Pink</option>
-                        </select>
-                        <select id="textureSelect" class="form-select mx-1" style="display: none;">
-                            <option value="metal.jpg">Metal</option>
-                            <option value="box.png">Box</option>
-                            <option value="wood.jpg">Wood</option>
-                            <option value="slime.jpg">Slime</option>
-                        </select>
-                        <script>
-                            const colorSelect = document.getElementById('colorSelect');
-                            const typeSelect = document.getElementById('typeSelect');
-                            const textureSelect = document.getElementById('textureSelect');
 
-                            colorSelect.addEventListener('change', function() {
-                                this.style.color = this.value;
-                            });
+<head>
+  <title>PA Room Design</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/PointerLockControls.js"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
 
-                            typeSelect.addEventListener('change', function() {
-                                if (this.value === 'color') {
-                                    colorSelect.style.display = 'block';
-                                    textureSelect.style.display = 'none';
-                                } else if (this.value === 'texture') {
-                                    colorSelect.style.display = 'none';
-                                    textureSelect.style.display = 'block';
-                                }
-                            });
-                        </script>
-                    </div>
-                    <button type="submit" class="btn btn-primary mt-3">Adicionar Primitiva</button>
-                </form>
-            </div>
-            <!--Aqui div de adicionar modelo e manipular objeto-->
-            <div class="menu-div ms-3 d-flex flex-column align-items-center justify-content-evenly h-100 w-100">
-                <form id="addModel" class="d-flex flex-column align-items-center justify-content-center">
-                    <input class="mb-3 form-control" type="file" id="file" name="file" accept=".obj">
-                    <button type="submit" class="btn btn-primary mb-3">Adicionar Modelo</button>
-                </form>
-                <form id="manipulateObj" class="d-flex flex-column align-items-center justify-content-center">
-                    <div class="pt-4" style="border-top: 2px solid rgb(215, 214, 214); width: 200%;"></div>
-                    <select class="form-select mb-3">
-                        <!--TODO adicionar valores de primitivas-->
-                        <option value="Par1">Par1</option>
-                        <option value="Par2">Par2</option>
-                        <option value="Par3">Par3</option>
-                    </select>
-                    <button type="submit" class="btn btn-primary">Manipular Objeto</button>
-                </form>
-            </div>
-            <!--Aqui div de adicionar luz-->
-            <div class="menu-div ms-3 d-flex flex-column align-items-center justify-content-center h-100 w-100" style="border-bottom: 2px solid rgb(215, 214, 214);">
-                <form id="addLight" class="d-flex flex-column align-items-center justify-content-center">
-                    <label for="lightPosition">Posição:</label>
-                    <div class="d-flex justify-content-evenly ">
-                        <input class="form-control mx-1" type="number" id="lightPosX" name="lightPosX" placeholder="X" required style="width: 70px;">
-                        <input class="form-control mx-1" type="number" id="lightPosY" name="lightPosY" placeholder="Y" required style="width: 70px;">
-                        <input class="form-control mx-1" type="number" id="lightPosZ" name="lightPosZ" placeholder="Z" required style="width: 70px;">
-                    </div>
-                    <label for="lightDirection">Direção:</label>
-                    <div class="d-flex justify-content-evenly">
-                        <input class="form-control mx-1" type="number" id="lightDirX" name="lightDirX" placeholder="X" required style="width: 70px;">
-                        <input class="form-control mx-1" type="number" id="lightDirY" name="lightDirY" placeholder="Y" required style="width: 70px;">
-                        <input class="form-control mx-1" type="number" id="lightDirZ" name="lightDirZ" placeholder="Z" required style="width: 70px;">
-                    </div>
-                    <label for="lightColor">Cor:</label>
-                    <div class="d-flex justify-content-evenly">
-                        <input class="form-control mx-1" type="number" id="lightColorR" name="lightColorR" placeholder="R" required style="width: 70px;">
-                        <input class="form-control mx-1" type="number" id="lightColorG" name="lightColorG" placeholder="G" required style="width: 70px;">
-                        <input class="form-control mx-1" type="number" id="lightColorB" name="lightColorB" placeholder="B" required style="width: 70px;">
-                    </div>
-                    <button type="submit" class="btn btn-primary mt-3">Adicionar Luz</button>
-                </form>
-            </div>
+<body class="d-flex justify-content-center align-items-center" style="height: 100vh;">
+  <canvas class="d-block" id="gl-canvas" width="800" height="800"></canvas>
+  <!--TODO: Colocar os formulários a funcionar -->
+  <div class="d-flex flex-column justify-content-evenly align-items-center menu">
+    <!--Aqui div de adicionar primitiva-->
+    <div class="menu-div ms-3 d-flex flex-column align-items-center justify-content-center h-100 w-100">
+      <form id="addPrimitiveForm" class="d-flex flex-column align-items-center justify-content-center">
+        <div class="d-flex">
+          <select class="form-select mb-3" id="primitiveType">
+            <option value="parallelepiped">Paralelipipedo</option>
+            <option value="pyramid">Piramide quadrangular</option>
+          </select>
+          <!--TODO: adicionar logica dos ids aqui-->
+          <h6 class="mx-3">ID: Par1</h6>
         </div>
-    </body>
+        <div class="d-flex justify-content-evenly">
+          <div>
+            <label for="primitiveHeight">Altura:</label>
+            <input class="form-control mx-1" type="number" id="primitiveHeight" name="primitiveHeight" placeholder="altura" required style="width: 70px;">
+          </div>
+          <div>
+            <label for="primitiveWidth">Largura:</label>
+            <input class="form-control mx-1" type="number" id="primitiveWidth" name="primitiveWidth" placeholder="largura" required style="width: 70px;">
+          </div>
+          <div>
+            <label for="primitiveDepth">Profundidade:</label>
+            <input class="form-control mx-1" type="number" id="primitiveDepth" name="primitiveDepth" placeholder="profundidade" required style="width: 70px;">
+          </div>
+        </div>
+        <div class="d-flex mt-3">
+          <select id="typeSelect" class="form-select mx-1">
+            <option value="color">Cor</option>
+            <option value="texture">Textura</option>
+          </select>
+          <select id="colorSelect" class="form-select mx-1">
+            <option value="red">Red</option>
+            <option value="blue">Blue</option>
+            <option value="yellow">Yellow</option>
+            <option value="green">Green</option>
+            <option value="orange">Orange</option>
+            <option value="purple">Purple</option>
+            <option value="cyan">Cyan</option>
+            <option value="magenta">Magenta</option>
+            <option value="lime">Lime</option>
+            <option value="pink">Pink</option>
+          </select>
+          <select id="textureSelect" class="form-select mx-1" style="display: none;">
+            <option value="metal.jpg">Metal</option>
+            <option value="box.png">Box</option>
+            <option value="wood.jpg">Wood</option>
+            <option value="slime.jpg">Slime</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary mt-3">Adicionar Primitiva</button>
+      </form>
+    </div>
+    <!--Aqui div de adicionar modelo e manipular objeto-->
+    <div class="menu-div ms-3 d-flex flex-column align-items-center justify-content-evenly h-100 w-100">
+      <form id="addModel" class="d-flex flex-column align-items-center justify-content-center">
+        <input class="mb-3 form-control" type="file" id="file" name="file" accept=".obj">
+        <button type="submit" class="btn btn-primary mb-3">Adicionar Modelo</button>
+      </form>
+      <form id="manipulateObj" class="d-flex flex-column align-items-center justify-content-center">
+        <div class="pt-4" style="border-top: 2px solid rgb(215, 214, 214); width: 200%;"></div>
+        <select class="form-select mb-3">
+          <!--TODO adicionar valores de primitivas-->
+          <option value="Par1">Par1</option>
+          <option value="Par2">Par2</option>
+          <option value="Par3">Par3</option>
+        </select>
+        <button type="submit" class="btn btn-primary">Manipular Objeto</button>
+      </form>
+    </div>
+    <!--Aqui div de adicionar luz-->
+    <div class="menu-div ms-3 d-flex flex-column align-items-center justify-content-center h-100 w-100" style="border-bottom: 2px solid rgb(215, 214, 214);">
+      <form id="addLight" class="d-flex flex-column align-items-center justify-content-center">
+        <label for="lightPosition">Posição:</label>
+        <div class="d-flex justify-content-evenly ">
+          <input class="form-control mx-1" type="number" id="lightPosX" name="lightPosX" placeholder="X" required style="width: 70px;">
+          <input class="form-control mx-1" type="number" id="lightPosY" name="lightPosY" placeholder="Y" required style="width: 70px;">
+          <input class="form-control mx-1" type="number" id="lightPosZ" name="lightPosZ" placeholder="Z" required style="width: 70px;">
+        </div>
+        <label for="lightDirection">Direção:</label>
+        <div class="d-flex justify-content-evenly">
+          <input class="form-control mx-1" type="number" id="lightDirX" name="lightDirX" placeholder="X" required style="width: 70px;">
+          <input class="form-control mx-1" type="number" id="lightDirY" name="lightDirY" placeholder="Y" required style="width: 70px;">
+          <input class="form-control mx-1" type="number" id="lightDirZ" name="lightDirZ" placeholder="Z" required style="width: 70px;">
+        </div>
+        <label for="lightColor">Cor:</label>
+        <div class="d-flex justify-content-evenly">
+          <input class="form-control mx-1" type="number" id="lightColorR" name="lightColorR" placeholder="R" required style="width: 70px;">
+          <input class="form-control mx-1" type="number" id="lightColorG" name="lightColorG" placeholder="G" required style="width: 70px;">
+          <input class="form-control mx-1" type="number" id="lightColorB" name="lightColorB" placeholder="B" required style="width: 70px;">
+        </div>
+        <button type="submit" class="btn btn-primary mt-3">Adicionar Luz</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/form.js"></script>
+  <script src="js/room.js"></script>
+</body>
+
 </html>
