@@ -88,7 +88,6 @@ const keysPressed = {};
 // Event listeners para teclas
 window.addEventListener("keydown", (event) => {
   keysPressed[event.key] = true;
-  console.log(keysPressed);
 });
 
 window.addEventListener("keyup", (event) => {
@@ -157,14 +156,27 @@ const getFormPrimitive = () => {
   const height = document.getElementById("primitiveHeight").value;
   const width = document.getElementById("primitiveWidth").value;
   const depth = document.getElementById("primitiveDepth").value;
+  const attribute = document.getElementById("primitiveAttribute").value;
 
-  const primitive = parsePrimitive({ type, height, width, depth });
+  const attributeValue =
+    attribute === "texture"
+      ? document.getElementById("primitiveTexture").value
+      : document.getElementById("primitiveColor").value;
+
+  const primitive = parsePrimitive({
+    type,
+    height,
+    width,
+    depth,
+    attribute,
+    attributeValue,
+  });
 
   return primitive;
 };
 
 const parsePrimitive = (primitive) => {
-  const { type, height, width, depth } = primitive;
+  const { type, height, width, depth, attribute, attributeValue } = primitive;
 
   let primitiveType = type === "pyramid" ? "pyramid" : "box";
 
@@ -173,12 +185,14 @@ const parsePrimitive = (primitive) => {
     height: parseFloat(height) || 1,
     width: parseFloat(width) || 1,
     depth: parseFloat(depth) || 1,
+    attribute,
+    attributeValue,
   };
 };
 
 const createPrimitive = (primitive) => {
   const geometry = getPrimitiveGeometry(primitive);
-  const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+  const material = getPrimitiveMaterial(primitive);
   const mesh = new THREE.Mesh(geometry, material);
 
   mesh.position.set(0, primitive.height / 2, 0);
@@ -189,13 +203,24 @@ const createPrimitive = (primitive) => {
 const getPrimitiveGeometry = (primitive) => {
   const { type, height, width, depth } = primitive;
 
-  switch (type) {
-    case "pyramid":
-      return new THREE.ConeGeometry(width, height, 4);
-    case "box":
-    default:
-      return new THREE.BoxGeometry(width, height, depth);
+  if (type === "pyramid") {
+    return new THREE.ConeGeometry(width, height, 4);
   }
+
+  return new THREE.BoxGeometry(width, height, depth);
+};
+
+const getPrimitiveMaterial = (primitive) => {
+  const { attribute, attributeValue } = primitive;
+
+  if (attribute === "texture") {
+    const texture = new THREE.TextureLoader().load(
+      `../textures/${attributeValue}`
+    );
+    return new THREE.MeshBasicMaterial({ map: texture });
+  }
+
+  return new THREE.MeshBasicMaterial({ color: attributeValue });
 };
 
 // Função de animação
