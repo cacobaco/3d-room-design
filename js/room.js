@@ -1,13 +1,8 @@
 // Criar cena, câmera e renderizador
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(
-    75,
-    800 / 800,
-    0.1,
-    1000
-);
+const camera = new THREE.PerspectiveCamera(75, 800 / 800, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer({
-    canvas: document.getElementById("gl-canvas"),
+  canvas: document.getElementById("gl-canvas"),
 });
 renderer.setSize(800, 800);
 
@@ -22,13 +17,13 @@ directionalLight.position.set(5, 10, 7.5).normalize();
 scene.add(directionalLight);
 
 // Material para paredes e chão
-const wallTexture = new THREE.TextureLoader().load('../textures/wall.jpg');
+const wallTexture = new THREE.TextureLoader().load("../textures/wall.jpg");
 const wallMaterial = new THREE.MeshBasicMaterial({
-    map: wallTexture,
+  map: wallTexture,
 });
-const floorTexture = new THREE.TextureLoader().load('../textures/floor.jpg');
+const floorTexture = new THREE.TextureLoader().load("../textures/floor.jpg");
 const floorMaterial = new THREE.MeshBasicMaterial({
-    map: floorTexture,
+  map: floorTexture,
 });
 
 // Criar paredes
@@ -44,15 +39,15 @@ scene.add(wall2);
 // Adicionar arestas pretas às paredes
 const wall1Edges = new THREE.EdgesGeometry(wallGeometry);
 const wall1Line = new THREE.LineSegments(
-    wall1Edges,
-    new THREE.LineBasicMaterial({ color: 0x000000 })
+  wall1Edges,
+  new THREE.LineBasicMaterial({ color: 0x000000 })
 );
 wall1.add(wall1Line);
 
 const wall2Edges = new THREE.EdgesGeometry(wallGeometry);
 const wall2Line = new THREE.LineSegments(
-    wall2Edges,
-    new THREE.LineBasicMaterial({ color: 0x000000 })
+  wall2Edges,
+  new THREE.LineBasicMaterial({ color: 0x000000 })
 );
 wall2.add(wall2Line);
 
@@ -66,17 +61,17 @@ scene.add(floor);
 // Adicionar arestas pretas ao chão
 const floorEdges = new THREE.EdgesGeometry(floorGeometry);
 const floorLine = new THREE.LineSegments(
-    floorEdges,
-    new THREE.LineBasicMaterial({ color: 0x000000 })
+  floorEdges,
+  new THREE.LineBasicMaterial({ color: 0x000000 })
 );
 floor.add(floorLine);
 
 // Carregar e adicionar modelo OBJ
 async function addModel(location) {
-    const loader = new THREE.OBJLoader();
-    loader.load(location, function (object) {
-        scene.add(object);
-    });
+  const loader = new THREE.OBJLoader();
+  loader.load(location, function (object) {
+    scene.add(object);
+  });
 }
 
 // Carregar um modelo de exemplo
@@ -87,71 +82,125 @@ camera.position.set(5, 5, 15);
 camera.lookAt(0, 5, 0);
 
 // Variáveis para controle de movimento
-const moveSpeed = 0.1;
+let moveSpeed = 0.1;
 const keysPressed = {};
 
 // Event listeners para teclas
 window.addEventListener("keydown", (event) => {
-    keysPressed[event.key] = true;
+  keysPressed[event.key] = true;
+  console.log(keysPressed);
 });
 
 window.addEventListener("keyup", (event) => {
-    keysPressed[event.key] = false;
+  keysPressed[event.key] = false;
 });
 
 // Controle de movimento WASD
 function updateCamera() {
-    if (keysPressed[" "]) {
-      moveSpeed = 0.5;
-    } else {
-      moveSpeed = 0.1;
-    }
-    if (keysPressed["w"]) {
-        controls.moveForward(moveSpeed);
-    }
-    if (keysPressed["s"]) {
-        controls.moveForward(-moveSpeed);
-    }
-    if (keysPressed["a"]) {
-        controls.moveRight(-moveSpeed);
-    }
-    if (keysPressed["d"]) {
-        controls.moveRight(moveSpeed);
-    }
-    if (keysPressed["q"]) {
-        camera.position.y += moveSpeed;
-    }
-    if (keysPressed["e"]) {
-        camera.position.y -= moveSpeed;
-    }
-    requestAnimationFrame(updateCamera);
+  if (keysPressed[" "]) {
+    moveSpeed = 0.5;
+  } else {
+    moveSpeed = 0.1;
+  }
+  if (keysPressed["w"]) {
+    controls.moveForward(moveSpeed);
+  }
+  if (keysPressed["s"]) {
+    controls.moveForward(-moveSpeed);
+  }
+  if (keysPressed["a"]) {
+    controls.moveRight(-moveSpeed);
+  }
+  if (keysPressed["d"]) {
+    controls.moveRight(moveSpeed);
+  }
+  if (keysPressed["q"]) {
+    camera.position.y += moveSpeed;
+  }
+  if (keysPressed["e"]) {
+    camera.position.y -= moveSpeed;
+  }
+  requestAnimationFrame(updateCamera);
 }
 updateCamera();
 
 // Usar PointerLockControls para navegação estilo FPS
-const controls = new THREE.PointerLockControls(
-    camera,
-    document.body
-);
+const controls = new THREE.PointerLockControls(camera, document.body);
 
 // Event listeners para controle de rotação com o mouse
 document.addEventListener("pointerlockchange", () => {
-    if (document.pointerLockElement === document.body) {
-        controls.enabled = true;
-    } else {
-        controls.enabled = false;
-    }
+  if (document.pointerLockElement === document.body) {
+    controls.enabled = true;
+  } else {
+    controls.enabled = false;
+  }
 });
 
+document.getElementById("gl-canvas").addEventListener("click", () => {
+  document.body.requestPointerLock();
+});
+
+// Primitives
+const primitives = [];
+
 document
-    .getElementById("gl-canvas")
-    .addEventListener("click", () => {
-        document.body.requestPointerLock();
-    });
+  .getElementById("addPrimitiveForm")
+  .addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    const primitive = getFormPrimitive();
+    createPrimitive(primitive);
+  });
+
+const getFormPrimitive = () => {
+  const type = document.getElementById("primitiveType").value;
+  const height = document.getElementById("primitiveHeight").value;
+  const width = document.getElementById("primitiveWidth").value;
+  const depth = document.getElementById("primitiveDepth").value;
+
+  const primitive = parsePrimitive({ type, height, width, depth });
+
+  return primitive;
+};
+
+const parsePrimitive = (primitive) => {
+  const { type, height, width, depth } = primitive;
+
+  let primitiveType = type === "pyramid" ? "pyramid" : "box";
+
+  return {
+    type: primitiveType,
+    height: parseFloat(height) || 1,
+    width: parseFloat(width) || 1,
+    depth: parseFloat(depth) || 1,
+  };
+};
+
+const createPrimitive = (primitive) => {
+  const geometry = getPrimitiveGeometry(primitive);
+  const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+  const mesh = new THREE.Mesh(geometry, material);
+
+  mesh.position.set(0, primitive.height / 2, 0);
+  scene.add(mesh);
+  primitives.push(mesh);
+};
+
+const getPrimitiveGeometry = (primitive) => {
+  const { type, height, width, depth } = primitive;
+
+  switch (type) {
+    case "pyramid":
+      return new THREE.ConeGeometry(width, height, 4);
+    case "box":
+    default:
+      return new THREE.BoxGeometry(width, height, depth);
+  }
+};
 
 // Função de animação
 function animate() {
-    requestAnimationFrame(animate);
-    renderer.render(scene, camera);
+  requestAnimationFrame(animate);
+  renderer.render(scene, camera);
 }
 animate();
