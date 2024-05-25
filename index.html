@@ -104,32 +104,26 @@
     </div>
     <!--Aqui div de adicionar luz-->
     <div class="menu-div ms-3 d-flex flex-column align-items-center justify-content-center h-100 w-100" style="border-bottom: 2px solid rgb(215, 214, 214);">
-      <form id="addLightForm" class="d-flex flex-column align-items-center justify-content-center">
-        <div class="d-flex justify-content-evenly mt-2">
-          <input class="form-control mx-1" type="number" id="lightPosX" name="lightPosX" placeholder="PosX" required style="width: 90px;">
-          <input class="form-control mx-1" type="number" id="lightPosY" name="lightPosY" placeholder="PosY" required style="width: 90px;">
-          <input class="form-control mx-1" type="number" id="lightPosZ" name="lightPosZ" placeholder="PosZ" required style="width: 90px;">
+      <form id="addLight" class="d-flex flex-column align-items-center justify-content-center">
+        <label for="lightPosition">Posição:</label>
+        <div class="d-flex justify-content-evenly ">
+          <input class="form-control mx-1" type="number" id="lightPosX" name="lightPosX" placeholder="X" required style="width: 70px;">
+          <input class="form-control mx-1" type="number" id="lightPosY" name="lightPosY" placeholder="Y" required style="width: 70px;">
+          <input class="form-control mx-1" type="number" id="lightPosZ" name="lightPosZ" placeholder="Z" required style="width: 70px;">
         </div>
-        <div class="d-flex justify-content-evenly mt-2">
-          <input class="form-control mx-1" type="number" id="lightDirX" name="lightDirX" placeholder="DirX" required style="width: 90px;">
-          <input class="form-control mx-1" type="number" id="lightDirY" name="lightDirY" placeholder="DirY" required style="width: 90px;">
-          <input class="form-control mx-1" type="number" id="lightDirZ" name="lightDirZ" placeholder="DirZ" required style="width: 90px;">
+        <label for="lightDirection">Direção:</label>
+        <div class="d-flex justify-content-evenly">
+          <input class="form-control mx-1" type="number" id="lightDirX" name="lightDirX" placeholder="X" required style="width: 70px;">
+          <input class="form-control mx-1" type="number" id="lightDirY" name="lightDirY" placeholder="Y" required style="width: 70px;">
+          <input class="form-control mx-1" type="number" id="lightDirZ" name="lightDirZ" placeholder="Z" required style="width: 70px;">
         </div>
-        <div class="d-flex justify-content-evenly mt-2">
-          <input class="form-control mx-1" type="number" id="lightColorR" name="lightColorR" placeholder="R" required style="width: 90px;">
-          <input class="form-control mx-1" type="number" id="lightColorG" name="lightColorG" placeholder="G" required style="width: 90px;">
-          <input class="form-control mx-1" type="number" id="lightColorB" name="lightColorB" placeholder="B" required style="width: 90px;">
+        <label for="lightColor">Cor:</label>
+        <div class="d-flex justify-content-evenly">
+          <input class="form-control mx-1" type="number" id="lightColorR" name="lightColorR" placeholder="R" required style="width: 70px;">
+          <input class="form-control mx-1" type="number" id="lightColorG" name="lightColorG" placeholder="G" required style="width: 70px;">
+          <input class="form-control mx-1" type="number" id="lightColorB" name="lightColorB" placeholder="B" required style="width: 70px;">
         </div>
-        <button type="submit" class="btn btn-primary mt-2 mb-2">Adicionar Luz</button>
-      </form>
-      <form id="removeLightForm" class="d-flex flex-column align-items-center justify-content-center">
-        <div class="pt-2" style="border-top: 2px solid rgb(215, 214, 214); width: 200%;"></div>
-        <select class="form-select mb-2">
-          <option value="Luz1">Luz1</option>
-          <option value="Luz2">Luz2</option>
-          <option value="Luz3">Luz3</option>
-        </select>
-        <button type="submit" class="btn btn-primary mb-2">Remover Luz</button>
+        <button type="submit" class="btn btn-primary mt-3">Adicionar Luz</button>
       </form>
     </div>
   </div>
