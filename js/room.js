@@ -101,6 +101,11 @@ window.addEventListener("keyup", (event) => {
 
 // Controle de movimento WASD
 function updateCamera() {
+    if (keysPressed[" "]) {
+      moveSpeed = 0.5;
+    } else {
+      moveSpeed = 0.1;
+    }
     if (keysPressed["w"]) {
         controls.moveForward(moveSpeed);
     }
