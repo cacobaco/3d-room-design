@@ -15,3 +15,16 @@ primitiveAttributeSelect.addEventListener("change", function () {
 primitiveColorSelect.addEventListener("change", function () {
   this.style.color = this.value;
 });
+
+const manipulableObjectsSelect = document.getElementById("manipulableObjectId");
+
+function addManipulableObjectOption(objectId) {
+  const option = document.createElement("option");
+  option.value = objectId;
+  option.text = objectId;
+  manipulableObjectsSelect.appendChild(option);
+}
+
+function removeManipulableObjectOption(objectId) {
+  manipulableObjectsSelect.remove(objectId);
+}
