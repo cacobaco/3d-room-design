@@ -22,11 +22,13 @@ directionalLight.position.set(5, 10, 7.5).normalize();
 scene.add(directionalLight);
 
 // Material para paredes e chão
+const wallTexture = new THREE.TextureLoader().load('../textures/wall.jpg');
 const wallMaterial = new THREE.MeshBasicMaterial({
-    color: 0xc0c0c0,
+    map: wallTexture,
 });
+const floorTexture = new THREE.TextureLoader().load('../textures/floor.jpg');
 const floorMaterial = new THREE.MeshBasicMaterial({
-    color: 0x808080,
+    map: floorTexture,
 });
 
 // Criar paredes
