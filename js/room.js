@@ -743,7 +743,6 @@ function createPointLight({ intensity, decay, posX, posY, posZ, R, G, B }) {
 // *************
 // *** SPOT ****
 // *************
-
 document.getElementById("addSpotLightForm").addEventListener("submit", (event) => {
   event.preventDefault();
   scene.remove(spotLight);
