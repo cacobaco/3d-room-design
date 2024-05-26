@@ -138,9 +138,9 @@
             <input class="form-control mx-1" type="number" id="ambientLightIntensity" name="ambientLightIntensity" placeholder="Intensidade" value="1" required style="width: 90px;">
           </div>
           <div class="d-flex justify-content-evenly mt-2">
-            <input class="form-control mx-1" type="number" id="ambientLightR" name="lightColorR" placeholder="R" required style="width: 90px;" min="0" max="255">
-            <input class="form-control mx-1" type="number" id="ambientLightG" name="lightColorG" placeholder="G" required style="width: 90px;" min="0" max="255">
-            <input class="form-control mx-1" type="number" id="ambientLightB" name="lightColorB" placeholder="B" required style="width: 90px;" min="0" max="255">
+            <input class="form-control mx-1 border border-danger" type="number" id="ambientLightR" name="lightColorR" placeholder="R" required style="width: 90px;" min="0" max="255">
+            <input class="form-control mx-1 border border-danger" type="number" id="ambientLightG" name="lightColorG" placeholder="G" required style="width: 90px;" min="0" max="255">
+            <input class="form-control mx-1 border border-danger" type="number" id="ambientLightB" name="lightColorB" placeholder="B" required style="width: 90px;" min="0" max="255">
           </div>
           <button type="submit" class="btn btn-primary mt-2 mb-2">Adicionar Luz</button>
         </div>
@@ -154,18 +154,18 @@
       <form id="addPointLightForm" class="flex-column align-items-center justify-content-center" style="display: none">
         <div class="d-flex flex-column align-items-center justify-content-center">
           <div class="d-flex justify-content-evenly mt-2">
-            <input class="form-control mx-1" type="number" id="pointLightIntensity" name="pointLightIntensity" placeholder="Intensidade" required style="width: 90px;">
-            <input class="form-control mx-1" type="number" id="pointLightDecay" name="decay" placeholder="Decadência" required style="width: 90px;" value="1">
+            <input class="form-control mx-1 border border-danger" type="number" id="pointLightIntensity" name="pointLightIntensity" placeholder="Intensidade" required style="width: 90px;">
+            <input class="form-control mx-1 border border-danger" type="number" id="pointLightDecay" name="decay" placeholder="Decadência" required style="width: 90px;" value="1">
           </div>
           <div class="d-flex justify-content-evenly mt-2">
-            <input class="form-control mx-1" type="number" id="pointLightPosX" name="pointLightPosX" placeholder="PosX" required style="width: 90px;" value="1">
-            <input class="form-control mx-1" type="number" id="pointLightPosY" name="pointLightPosY" placeholder="PosY" required style="width: 90px;" value="1">
-            <input class="form-control mx-1" type="number" id="pointLightPosZ" name="pointLightPosZ" placeholder="PosZ" required style="width: 90px;" value="1">
+            <input class="form-control mx-1 border border-danger" type="number" id="pointLightPosX" name="pointLightPosX" placeholder="PosX" required style="width: 90px;" value="1">
+            <input class="form-control mx-1 border border-danger" type="number" id="pointLightPosY" name="pointLightPosY" placeholder="PosY" required style="width: 90px;" value="1">
+            <input class="form-control mx-1 border border-danger" type="number" id="pointLightPosZ" name="pointLightPosZ" placeholder="PosZ" required style="width: 90px;" value="1">
           </div>
           <div class="d-flex justify-content-evenly mt-2">
-            <input class="form-control mx-1" type="number" id="pointLightR" name="pointLightColorR" placeholder="R" required style="width: 90px;" min="0" max="255">
-            <input class="form-control mx-1" type="number" id="pointLightG" name="pointLightColorG" placeholder="G" required style="width: 90px;" min="0" max="255">
-            <input class="form-control mx-1" type="number" id="pointLightB" name="pointLightColorB" placeholder="B" required style="width: 90px;" min="0" max="255">
+            <input class="form-control mx-1 border border-danger" type="number" id="pointLightR" name="pointLightColorR" placeholder="R" required style="width: 90px;" min="0" max="255">
+            <input class="form-control mx-1 border border-danger" type="number" id="pointLightG" name="pointLightColorG" placeholder="G" required style="width: 90px;" min="0" max="255">
+            <input class="form-control mx-1 border border-danger" type="number" id="pointLightB" name="pointLightColorB" placeholder="B" required style="width: 90px;" min="0" max="255">
           </div>
           <button type="submit" class="btn btn-primary mt-2 mb-2">Adicionar Luz</button>
         </div>
@@ -179,27 +179,27 @@
       <form id="addSpotLightForm" class="flex-column align-items-center justify-content-center" style="display: none">
         <div class="d-flex flex-column align-items-center justify-content-center">
           <div class="d-flex justify-content-evenly mt-2">
-            <input class="form-control mx-1" type="number" id="spotLightPenumbra" name="penumbra" placeholder="Penumbra" required style="width: 110px;" value="0" min="0">
-            <input class="form-control mx-1" type="number" id="spotLightAngle" name="angle" placeholder="Ângulo" required style="width: 110px;" value="1">
+            <input class="form-control mx-1 border border-danger" type="number" id="spotLightPenumbra" name="penumbra" placeholder="Penumbra" required style="width: 110px;" value="0" min="0">
+            <input class="form-control mx-1 border border-danger" type="number" id="spotLightAngle" name="angle" placeholder="Ângulo" required style="width: 110px;" value="1">
           </div>
           <div class="d-flex justify-content-evenly mt-2">
-            <input class="form-control mx-1" type="number" id="spotLightIntensity" name="spotLightIntensity" placeholder="Intensidade" required style="width: 90px;">
-            <input class="form-control mx-1" type="number" id="spotLightDecay" name="decay" placeholder="Decadência" required style="width: 90px;" value="1" min="0">
+            <input class="form-control mx-1 border border-danger" type="number" id="spotLightIntensity" name="spotLightIntensity" placeholder="Intensidade" required style="width: 90px;">
+            <input class="form-control mx-1 border border-danger" type="number" id="spotLightDecay" name="decay" placeholder="Decadência" required style="width: 90px;" value="1" min="0">
           </div>
           <div class="d-flex justify-content-evenly mt-2">
-            <input class="form-control mx-1" type="number" id="spotLightDirX" name="spotLightDirX" placeholder="DirX" required style="width: 90px;">
-            <input class="form-control mx-1" type="number" id="spotLightDirY" name="spotLightDirY" placeholder="DirY" required style="width: 90px;">
-            <input class="form-control mx-1" type="number" id="spotLightDirZ" name="spotLightDirZ" placeholder="DirZ" required style="width: 90px;">
+            <input class="form-control mx-1 border border-danger" type="number" id="spotLightDirX" name="spotLightDirX" placeholder="DirX" required style="width: 90px;">
+            <input class="form-control mx-1 border border-danger" type="number" id="spotLightDirY" name="spotLightDirY" placeholder="DirY" required style="width: 90px;">
+            <input class="form-control mx-1 border border-danger" type="number" id="spotLightDirZ" name="spotLightDirZ" placeholder="DirZ" required style="width: 90px;">
           </div>
           <div class="d-flex justify-content-evenly mt-2">
-            <input class="form-control mx-1" type="number" id="spotLightPosX" name="spotLightPosX" placeholder="PosX" required style="width: 90px;" value="1">
-            <input class="form-control mx-1" type="number" id="spotLightPosY" name="spotLightPosY" placeholder="PosY" required style="width: 90px;" value="1">
-            <input class="form-control mx-1" type="number" id="spotLightPosZ" name="spotLightPosZ" placeholder="PosZ" required style="width: 90px;" value="1">
+            <input class="form-control mx-1 border border-danger" type="number" id="spotLightPosX" name="spotLightPosX" placeholder="PosX" required style="width: 90px;" value="1">
+            <input class="form-control mx-1 border border-danger" type="number" id="spotLightPosY" name="spotLightPosY" placeholder="PosY" required style="width: 90px;" value="1">
+            <input class="form-control mx-1 border border-danger" type="number" id="spotLightPosZ" name="spotLightPosZ" placeholder="PosZ" required style="width: 90px;" value="1">
           </div>
           <div class="d-flex justify-content-evenly mt-2">
-            <input class="form-control mx-1" type="number" id="spotLightR" name="spotLightR" placeholder="R" required style="width: 90px;" min="0" max="255">
-            <input class="form-control mx-1" type="number" id="spotLightG" name="spotLightG" placeholder="G" required style="width: 90px;" min="0" max="255">
-            <input class="form-control mx-1" type="number" id="spotLightB" name="spotLightB" placeholder="B" required style="width: 90px;" min="0" max="255">
+            <input class="form-control mx-1 border border-danger" type="number" id="spotLightR" name="spotLightR" placeholder="R" required style="width: 90px;" min="0" max="255">
+            <input class="form-control mx-1 border border-danger" type="number" id="spotLightG" name="spotLightG" placeholder="G" required style="width: 90px;" min="0" max="255">
+            <input class="form-control mx-1 border border-danger" type="number" id="spotLightB" name="spotLightB" placeholder="B" required style="width: 90px;" min="0" max="255">
           </div>
           <button type="submit" class="btn btn-primary mt-2 mb-2">Adicionar Luz</button>
         </div>
