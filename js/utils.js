@@ -29,3 +29,16 @@ export function showErrorModal(title, message) {
 export function hideErrorModal() {
   $("#errorModal").modal("hide");
 }
+
+/**
+ * Rounds a number to the specified number of decimal places.
+ *
+ * @param {number} number - The number to round.
+ * @param {number} decimals - The number of decimal places to round to.
+ *
+ * @returns {number} The rounded number.
+ */
+export function round(number, decimals) {
+  const factor = Math.pow(10, decimals);
+  return Math.round(number * factor) / factor;
+}
