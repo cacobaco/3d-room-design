@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { PointerLockControls } from "three/addons/controls/PointerLockControls.js";
+import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
 import {
   addManipulableObjectOption,
   removeManipulableObjectOption,
@@ -52,6 +53,38 @@ camera.lookAt(0, 5, 0);
 // Variáveis para controle de movimento
 let moveSpeed = 0.1;
 const keysPressed = {};
+
+document
+  .getElementById("addModel")
+  .addEventListener("submit", function (event) {
+    event.preventDefault();
+
+    const loader = new OBJLoader();
+
+    const fileInput = document.getElementById("file");
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+
+    reader.addEventListener("load", function (event) {
+      // Parse the file content and load the model
+      const contents = event.target.result;
+      const object = loader.parse(contents);
+
+      // calcula o tamanho do modelo e do ambiente para ajustar o tamanho do modelo
+      const boundingBox = new THREE.Box3().setFromObject(object);
+      const modelSize = boundingBox.getSize(new THREE.Vector3());
+      const roomSize = new THREE.Vector3(10, 10, 10);
+
+      const scaleFactor = Math.min(
+        roomSize.x / modelSize.x,
+        roomSize.y / modelSize.y,
+        roomSize.z / modelSize.z
+      );
+      object.scale.set(scaleFactor, scaleFactor, scaleFactor);
+      scene.add(object);
+    });
+    reader.readAsText(file);
+  });
 
 // Event listeners para teclas
 window.addEventListener("keydown", (event) => {
