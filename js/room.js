@@ -9,8 +9,13 @@ const renderer = new THREE.WebGLRenderer({
 });
 renderer.setSize(800, 800);
 
+
 // Configurar cor de fundo do renderizador
 renderer.setClearColor(0x87ceeb);
+
+renderer.shadowMap.enabled = true; // Habilitar sombras
+renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Tipo de sombra (suavização)
+
 
 // Material para paredes e chão
 const wallTexture = new THREE.TextureLoader().load("../textures/wall.jpg");
@@ -26,10 +31,12 @@ const floorMaterial = new THREE.MeshPhongMaterial({
 const wallGeometry = new THREE.PlaneGeometry(10, 10);
 const wall1 = new THREE.Mesh(wallGeometry, wallMaterial);
 wall1.position.set(0, 5, -5);
+wall1.receiveShadow = true;
 scene.add(wall1);
 const wall2 = new THREE.Mesh(wallGeometry, wallMaterial);
 wall2.position.set(-5, 5, 0);
 wall2.rotation.y = Math.PI / 2;
+wall2.receiveShadow = true;
 scene.add(wall2);
 
 // Criar chão
@@ -37,6 +44,7 @@ const floorGeometry = new THREE.PlaneGeometry(10, 10);
 const floor = new THREE.Mesh(floorGeometry, floorMaterial);
 floor.rotation.x = -Math.PI / 2;
 floor.position.set(0, 0, 0);
+floor.receiveShadow = true;
 scene.add(floor);
 
 // Configurar a posição inicial da câmera
@@ -286,6 +294,8 @@ function createPrimitive(primitive) {
   const geometry = getPrimitiveGeometry(primitive);
   const material = getPrimitiveMaterial(primitive);
   const mesh = new THREE.Mesh(geometry, material);
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
 
   mesh.position.set(primitive.x, primitive.y, primitive.z);
 
@@ -435,21 +445,67 @@ function removeBorder(mesh) {
 // * LIGHTS *
 // **********
 
-let currentLight = null;
+let ambientLight = null;
+let directionalLight = null;
+let pointLight = null;
+let spotLight = null;
 
-document.getElementById("addLightForm").addEventListener("submit", (event) => {
+let sphere = null;
+let arrowHelper = null;
+let lightCone = null;
+
+function createLightSphere(position, color) {
+  scene.remove(sphere);
+  const sphereGeometry = new THREE.SphereGeometry(0.5, 16, 16);
+  const sphereMaterial = new THREE.MeshBasicMaterial({ color: color });
+  sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+  sphere.position.copy(position);
+  scene.add(sphere);
+}
+
+function createArrowHelper(newDirectionalLight, color) {
+  scene.remove(arrowHelper);
+  const direction = new THREE.Vector3();
+  newDirectionalLight.getWorldDirection(direction);
+  arrowHelper = new THREE.ArrowHelper(direction, newDirectionalLight.position, 2, color);
+  scene.add(arrowHelper);
+}
+
+function createSpotLightCone(spotLight, color) {
+  scene.remove(lightCone);
+  const coneGeometry = new THREE.ConeGeometry(0.5, 1, 32);
+  const coneMaterial = new THREE.MeshBasicMaterial({ color: color });
+  const cone = new THREE.Mesh(coneGeometry, coneMaterial);
+
+  cone.position.set(spotLight.position.x, spotLight.position.y, spotLight.position.z);
+  const direction = new THREE.Vector3();
+  spotLight.getWorldDirection(direction);
+
+  cone.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction.clone().normalize());
+
+  scene.add(cone);
+  lightCone = cone;
+
+  return cone;
+}
+
+// ***************
+// * DIRECTIONAL *
+// ***************
+
+
+document.getElementById("addDirectionalLightForm").addEventListener("submit", (event) => {
   event.preventDefault();
-  scene.remove(currentLight);
+  scene.remove(directionalLight);
   const light = getFormLight();
   createLight(light);
 });
 
-document
-  .getElementById("resetLightForm")
-  .addEventListener("submit", (event) => {
-    event.preventDefault();
-    scene.remove(currentLight);
-  });
+document.getElementById("resetDirectionalLightForm").addEventListener("submit", (event) => {
+  event.preventDefault();
+  scene.remove(directionalLight);
+  scene.remove(arrowHelper);
+});
 
 function getFormLight() {
   const posX = document.getElementById("lightPosX").value;
@@ -491,11 +547,178 @@ function parseLight({ posX, posY, posZ, dirX, dirY, dirZ, R, G, B }) {
 
 function createLight({ posX, posY, posZ, dirX, dirY, dirZ, R, G, B }) {
   const color = rgbToHex(R, G, B);
-  const directionalLight = new THREE.DirectionalLight(color, 1.4);
-  directionalLight.position.set(posX, posY, posZ).normalize();
-  directionalLight.lookAt(dirX, dirY, dirZ);
-  scene.add(directionalLight);
-  currentLight = directionalLight;
+  const newDirectionalLight = new THREE.DirectionalLight(color, 1.4);
+  newDirectionalLight.position.set(posX, posY, posZ);
+  newDirectionalLight.lookAt(dirX, dirY, dirZ);
+  newDirectionalLight.castShadow = true;
+  newDirectionalLight.shadow.mapSize.width = 2048;
+  newDirectionalLight.shadow.mapSize.height = 2048;
+  newDirectionalLight.shadow.camera.near = 0.5;
+  newDirectionalLight.shadow.camera.far = 500;
+  scene.add(newDirectionalLight);
+  createArrowHelper(newDirectionalLight, color);
+  directionalLight = newDirectionalLight;
+}
+
+// *************
+// * AMBIENTAL *
+// *************
+
+
+document.getElementById("addAmbientLightForm").addEventListener("submit", (event) => {
+  event.preventDefault();
+  scene.remove(ambientLight);
+  const light = getFormAmbientLight();
+  createAmbientLight(light);
+});
+
+document.getElementById("resetAmbientLightForm").addEventListener("submit", (event) => {
+  event.preventDefault();
+  scene.remove(ambientLight);
+});
+
+function getFormAmbientLight() {
+  const intensity = document.getElementById("ambientLightIntensity").value;
+  const R = document.getElementById("ambientLightR").value;
+  const G = document.getElementById("ambientLightG").value;
+  const B = document.getElementById("ambientLightB").value;
+
+  return {
+    intensity,
+    R,
+    G,
+    B,
+  };
+}
+
+function createAmbientLight({ intensity, R, G, B }) {
+  const color = rgbToHex(R, G, B);
+  const newAmbientLight = new THREE.AmbientLight(color, intensity);
+  scene.add(newAmbientLight);
+  ambientLight = newAmbientLight;
+}
+
+// *************
+// *** POINT ***
+// *************
+
+document.getElementById("addPointLightForm").addEventListener("submit", (event) => {
+  event.preventDefault();
+  scene.remove(pointLight);
+  const light = getFormPointLight();
+  createPointLight(light);
+});
+
+document.getElementById("resetPointLightForm").addEventListener("submit", (event) => {
+  event.preventDefault();
+  scene.remove(pointLight);
+  scene.remove(sphere);
+});
+
+function getFormPointLight() {
+  const intensity = document.getElementById("pointLightIntensity").value;
+  const posX = document.getElementById("pointLightPosX").value;
+  const posY = document.getElementById("pointLightPosY").value;
+  const posZ = document.getElementById("pointLightPosZ").value;
+  const R = document.getElementById("pointLightR").value;
+  const G = document.getElementById("pointLightG").value;
+  const B = document.getElementById("pointLightB").value;
+  const decay = document.getElementById("pointLightDecay").value;
+
+  return {
+    intensity,
+    decay,
+    posX,
+    posY,
+    posZ,
+    R,
+    G,
+    B,
+  };
+}
+
+function createPointLight({ intensity, decay, posX, posY, posZ, R, G, B }) {
+  const color = rgbToHex(R, G, B);
+  const newPointLight = new THREE.PointLight(color);
+  newPointLight.intensity = intensity;
+  newPointLight.decay = decay;
+  newPointLight.position.set(posX, posY, posZ);
+  newPointLight.castShadow = true;
+  newPointLight.shadow.mapSize.width = 2048;
+  newPointLight.shadow.mapSize.height = 2048;
+  newPointLight.shadow.camera.near = 0.5;
+  newPointLight.shadow.camera.far = 500;
+  scene.add(newPointLight);
+  pointLight = newPointLight;
+  createLightSphere(newPointLight.position, color);
+}
+
+// *************
+// *** SPOT ****
+// *************
+
+document.getElementById("addSpotLightForm").addEventListener("submit", (event) => {
+  event.preventDefault();
+  scene.remove(spotLight);
+  const light = getFormSpotLight();
+  createSpotLight(light);
+});
+
+document.getElementById("resetSpotLightForm").addEventListener("submit", (event) => {
+  event.preventDefault();
+  scene.remove(spotLight);
+  scene.remove(lightCone);
+});
+
+function getFormSpotLight() {
+  const intensity = document.getElementById("spotLightIntensity").value;
+  const posX = document.getElementById("spotLightPosX").value;
+  const posY = document.getElementById("spotLightPosY").value;
+  const posZ = document.getElementById("spotLightPosZ").value;
+  const R = document.getElementById("spotLightR").value;
+  const G = document.getElementById("spotLightG").value;
+  const B = document.getElementById("spotLightB").value;
+  const decay = document.getElementById("spotLightDecay").value;
+  const angle = document.getElementById("spotLightAngle").value;
+  const penumbra = document.getElementById("spotLightPenumbra").value;
+  const dirX = document.getElementById("spotLightDirX").value;
+  const dirY = document.getElementById("spotLightDirY").value;
+  const dirZ = document.getElementById("spotLightDirZ").value;
+
+  return {
+    intensity,
+    angle,
+    penumbra,
+    decay,
+    posX,
+    posY,
+    posZ,
+    R,
+    G,
+    B,
+    dirX,
+    dirY,
+    dirZ,
+  };
+}
+
+function createSpotLight({ intensity, angle, penumbra, decay, dirX, dirY, dirZ, posX, posY, posZ, R, G, B }) {
+  const color = rgbToHex(R, G, B);
+  const newSpotLight = new THREE.SpotLight(color);
+  newSpotLight.angle = angle;
+  newSpotLight.penumbra = penumbra;
+  newSpotLight.intensity = intensity;
+  newSpotLight.decay = decay;
+  newSpotLight.position.set(posX, posY, posZ);
+  newSpotLight.lookAt(dirX, dirY, dirZ);
+  newSpotLight.castShadow = true;
+  newSpotLight.shadow.mapSize.width = 2048;
+  newSpotLight.shadow.mapSize.height = 2048;
+  newSpotLight.shadow.camera.near = 0.5;
+  newSpotLight.shadow.camera.far = 500;
+  scene.add(newSpotLight);
+  spotLight = newSpotLight;
+  createSpotLightCone(newSpotLight, color);
 }
 
 // Função de animação
