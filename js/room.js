@@ -531,7 +531,6 @@ function removeBorder(mesh) {
 // **********
 // * LIGHTS *
 // **********
-
 let ambientLight = null;
 let directionalLight = null;
 let pointLight = null;
