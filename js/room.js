@@ -688,7 +688,6 @@ function createAmbientLight({ intensity, R, G, B }) {
 // *************
 // *** POINT ***
 // *************
-
 document.getElementById("addPointLightForm").addEventListener("submit", (event) => {
   event.preventDefault();
   scene.remove(pointLight);
