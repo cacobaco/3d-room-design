@@ -468,7 +468,7 @@ function updateSelectedObject() {
     return;
   }
 
-  if (keysPressed["delete"]) {
+  if (keysPressed["delete"] || keysPressed["backspace"]) {
     deletePrimitive(selectedPrimitive.id);
     return;
   }
