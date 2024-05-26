@@ -652,7 +652,6 @@ function createLight({ posX, posY, posZ, dirX, dirY, dirZ, R, G, B }) {
 // * AMBIENTAL *
 // *************
 
-
 document.getElementById("addAmbientLightForm").addEventListener("submit", (event) => {
   event.preventDefault();
   scene.remove(ambientLight);
