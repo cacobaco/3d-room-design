@@ -454,6 +454,7 @@ let arrowHelper = null;
 let lightCone = null;
 
 let directionalTarget = null;
+let spotTarget = null;
 
 function createLightSphere(position, color) {
   scene.remove(sphere);
@@ -476,17 +477,13 @@ function createSpotLightCone(spotLight, color) {
   const coneGeometry = new THREE.ConeGeometry(0.5, 1, 32);
   const coneMaterial = new THREE.MeshBasicMaterial({ color: color });
   const cone = new THREE.Mesh(coneGeometry, coneMaterial);
+  cone.position.copy(spotLight.position);
 
-  cone.position.set(spotLight.position.x, spotLight.position.y, spotLight.position.z);
-  const direction = new THREE.Vector3();
-  spotLight.getWorldDirection(direction);
-
-  cone.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction.clone().normalize());
+  const dirVector = new THREE.Vector3().subVectors(spotTarget.position, spotLight.position).normalize();
+  cone.quaternion.setFromUnitVectors(new THREE.Vector3(0, -1, 0), dirVector);
 
   scene.add(cone);
   lightCone = cone;
-
-  return cone;
 }
 
 // ***************
@@ -708,6 +705,7 @@ function getFormSpotLight() {
 }
 
 function createSpotLight({ intensity, angle, penumbra, decay, dirX, dirY, dirZ, posX, posY, posZ, R, G, B }) {
+  scene.remove(spotTarget);
   const color = rgbToHex(R, G, B);
   const newSpotLight = new THREE.SpotLight(color);
   newSpotLight.angle = angle;
@@ -715,7 +713,10 @@ function createSpotLight({ intensity, angle, penumbra, decay, dirX, dirY, dirZ, 
   newSpotLight.intensity = intensity;
   newSpotLight.decay = decay;
   newSpotLight.position.set(posX, posY, posZ);
-  newSpotLight.lookAt(dirX, dirY, dirZ);
+  spotTarget = new THREE.Object3D();
+  spotTarget.position.set(dirX, dirY, dirZ);
+  scene.add(spotTarget);
+  newSpotLight.target = spotTarget;
   newSpotLight.castShadow = true;
   newSpotLight.shadow.mapSize.width = 2048;
   newSpotLight.shadow.mapSize.height = 2048;
