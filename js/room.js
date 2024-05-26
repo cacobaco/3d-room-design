@@ -50,55 +50,40 @@ let moveSpeed = 0.1;
 const keysPressed = {};
 
 
-/**
- *
- * @property {HTMLElement} form - The form element used for model submission.
- * @property {HTMLElement} fileInput - The input element used for file selection.
- * @property {File} file - The selected file from the file input.
- * @property {FileReader} reader - The FileReader instance used to read the file.
- * @property {string} contents - The contents of the file read as text.
- * @property {THREE.Group} object - The 3D model parsed from the file contents.
- * @property {THREE.Box3} boundingBox - The bounding box of the 3D model.
- * @property {THREE.Vector3} modelSize - The original size of the 3D model.
- * @property {THREE.Vector3} roomSize - The size of the "room" in the 3D scene.
- * @property {number} scaleFactor - The factor used to scale the model to fit in the room.
- * @property {OBJLoader} loader - The OBJLoader instance used to load the 3D model.
- */
 
-// Recebe os inputs do formulário para o modelo
-const form = document.getElementById('addModel');
-const fileInput = document.getElementById('file');
-
-// Event listener para adicionar o modelo
-form.addEventListener('submit', function(event) {
-  const loader = new OBJLoader();
+document.getElementById("addModel").addEventListener("submit", function (event) {
+      const fileInput = document.getElementById('file');
   // Impede a pagina de atualizar
   event.preventDefault();
 
-  const file = fileInput.files[0];
-  const reader = new FileReader();
+// Event listener para adicionar o modelo
 
-  reader.addEventListener('load', function(event) {
-    // Parse the file content and load the model
-    const contents = event.target.result;
-    const object = loader.parse(contents);
+        const loader = new OBJLoader();
 
-    // calcula o tamanho do modelo e do ambiente para ajustar o tamanho do modelo
-    const boundingBox = new THREE.Box3().setFromObject(object);
-    const modelSize = boundingBox.getSize(new THREE.Vector3());
-    const roomSize = new THREE.Vector3(10, 10, 10);
 
-    const scaleFactor = Math.min(
-        roomSize.x / modelSize.x,
-        roomSize.y / modelSize.y,
-        roomSize.z / modelSize.z
-    );
-    object.scale.set(scaleFactor, scaleFactor, scaleFactor);
-    scene.add(object);
-  });
+        const file = fileInput.files[0];
+        const reader = new FileReader();
 
-  reader.readAsText(file);
-});
+        reader.addEventListener('load', function (event) {
+          // Parse the file content and load the model
+          const contents = event.target.result;
+          const object = loader.parse(contents);
+
+          // calcula o tamanho do modelo e do ambiente para ajustar o tamanho do modelo
+          const boundingBox = new THREE.Box3().setFromObject(object);
+          const modelSize = boundingBox.getSize(new THREE.Vector3());
+          const roomSize = new THREE.Vector3(10, 10, 10); // Replace with the actual size of your room
+
+          const scaleFactor = Math.min(
+              roomSize.x / modelSize.x,
+              roomSize.y / modelSize.y,
+              roomSize.z / modelSize.z
+          );
+          object.scale.set(scaleFactor, scaleFactor, scaleFactor);
+          scene.add(object);
+        })
+        reader.readAsText(file)
+      });
 
 
 
