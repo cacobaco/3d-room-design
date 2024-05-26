@@ -433,24 +433,30 @@ function isPrimitiveInsideRoom(primitive) {
 let selectedPrimitive = null;
 let primitiveCollisionsEnabled = false;
 
-document
-  .getElementById("manipulateObjectForm")
-  .addEventListener("submit", (event) => {
-    event.preventDefault();
+export function onManipulateObjectButtonClick() {
+  const id = document.getElementById("manipulableObjectId").value;
 
-    const id = document.getElementById("manipulableObjectId").value;
+  if (!id) {
+    return;
+  }
 
-    if (!id) {
-      return;
-    }
+  if (!primitives[id]) {
+    showErrorModal("Erro", `Não existe uma primitiva com o id "${id}".`);
+    return;
+  }
 
-    if (!primitives[id]) {
-      showErrorModal("Erro", `Não existe uma primitiva com o id "${id}".`);
-      return;
-    }
+  selectObject(id);
+}
 
-    selectObject(id);
-  });
+export function onDeleteObjectButtonClick() {
+  const id = document.getElementById("manipulableObjectId").value;
+
+  if (!id) {
+    return;
+  }
+
+  deletePrimitive(id);
+}
 
 function updateSelectedObject() {
   if (!selectedPrimitive) {
@@ -459,6 +465,11 @@ function updateSelectedObject() {
 
   if (keysPressed["enter"]) {
     deselectObject();
+    return;
+  }
+
+  if (keysPressed["delete"]) {
+    deletePrimitive(selectedPrimitive.id);
     return;
   }
 
@@ -587,8 +598,15 @@ function createLightSphere(position, color) {
 
 function createArrowHelper(newDirectionalLight, color) {
   scene.remove(arrowHelper);
-  const dirVector = new THREE.Vector3().subVectors(directionalTarget.position, newDirectionalLight.position).normalize();
-  arrowHelper = new THREE.ArrowHelper(dirVector, newDirectionalLight.position, 3, color);
+  const dirVector = new THREE.Vector3()
+    .subVectors(directionalTarget.position, newDirectionalLight.position)
+    .normalize();
+  arrowHelper = new THREE.ArrowHelper(
+    dirVector,
+    newDirectionalLight.position,
+    3,
+    color
+  );
   scene.add(arrowHelper);
 }
 
@@ -599,7 +617,9 @@ function createSpotLightCone(spotLight, color) {
   const cone = new THREE.Mesh(coneGeometry, coneMaterial);
   cone.position.copy(spotLight.position);
 
-  const dirVector = new THREE.Vector3().subVectors(spotTarget.position, spotLight.position).normalize();
+  const dirVector = new THREE.Vector3()
+    .subVectors(spotTarget.position, spotLight.position)
+    .normalize();
   cone.quaternion.setFromUnitVectors(new THREE.Vector3(0, -1, 0), dirVector);
 
   scene.add(cone);
@@ -609,18 +629,22 @@ function createSpotLightCone(spotLight, color) {
 // ***************
 // * DIRECTIONAL *
 // ***************
-document.getElementById("addDirectionalLightForm").addEventListener("submit", (event) => {
-  event.preventDefault();
-  scene.remove(directionalLight);
-  const light = getFormLight();
-  createLight(light);
-});
+document
+  .getElementById("addDirectionalLightForm")
+  .addEventListener("submit", (event) => {
+    event.preventDefault();
+    scene.remove(directionalLight);
+    const light = getFormLight();
+    createLight(light);
+  });
 
-document.getElementById("resetDirectionalLightForm").addEventListener("submit", (event) => {
-  event.preventDefault();
-  scene.remove(directionalLight);
-  scene.remove(arrowHelper);
-});
+document
+  .getElementById("resetDirectionalLightForm")
+  .addEventListener("submit", (event) => {
+    event.preventDefault();
+    scene.remove(directionalLight);
+    scene.remove(arrowHelper);
+  });
 
 function getFormLight() {
   const posX = document.getElementById("lightPosX").value;
@@ -682,17 +706,21 @@ function createLight({ posX, posY, posZ, dirX, dirY, dirZ, R, G, B }) {
 // *************
 // * AMBIENTAL *
 // *************
-document.getElementById("addAmbientLightForm").addEventListener("submit", (event) => {
-  event.preventDefault();
-  scene.remove(ambientLight);
-  const light = getFormAmbientLight();
-  createAmbientLight(light);
-});
+document
+  .getElementById("addAmbientLightForm")
+  .addEventListener("submit", (event) => {
+    event.preventDefault();
+    scene.remove(ambientLight);
+    const light = getFormAmbientLight();
+    createAmbientLight(light);
+  });
 
-document.getElementById("resetAmbientLightForm").addEventListener("submit", (event) => {
-  event.preventDefault();
-  scene.remove(ambientLight);
-});
+document
+  .getElementById("resetAmbientLightForm")
+  .addEventListener("submit", (event) => {
+    event.preventDefault();
+    scene.remove(ambientLight);
+  });
 
 function getFormAmbientLight() {
   const intensity = document.getElementById("ambientLightIntensity").value;
@@ -718,18 +746,22 @@ function createAmbientLight({ intensity, R, G, B }) {
 // *************
 // *** POINT ***
 // *************
-document.getElementById("addPointLightForm").addEventListener("submit", (event) => {
-  event.preventDefault();
-  scene.remove(pointLight);
-  const light = getFormPointLight();
-  createPointLight(light);
-});
+document
+  .getElementById("addPointLightForm")
+  .addEventListener("submit", (event) => {
+    event.preventDefault();
+    scene.remove(pointLight);
+    const light = getFormPointLight();
+    createPointLight(light);
+  });
 
-document.getElementById("resetPointLightForm").addEventListener("submit", (event) => {
-  event.preventDefault();
-  scene.remove(pointLight);
-  scene.remove(sphere);
-});
+document
+  .getElementById("resetPointLightForm")
+  .addEventListener("submit", (event) => {
+    event.preventDefault();
+    scene.remove(pointLight);
+    scene.remove(sphere);
+  });
 
 function getFormPointLight() {
   const intensity = document.getElementById("pointLightIntensity").value;
@@ -772,18 +804,22 @@ function createPointLight({ intensity, decay, posX, posY, posZ, R, G, B }) {
 // *************
 // *** SPOT ****
 // *************
-document.getElementById("addSpotLightForm").addEventListener("submit", (event) => {
-  event.preventDefault();
-  scene.remove(spotLight);
-  const light = getFormSpotLight();
-  createSpotLight(light);
-});
+document
+  .getElementById("addSpotLightForm")
+  .addEventListener("submit", (event) => {
+    event.preventDefault();
+    scene.remove(spotLight);
+    const light = getFormSpotLight();
+    createSpotLight(light);
+  });
 
-document.getElementById("resetSpotLightForm").addEventListener("submit", (event) => {
-  event.preventDefault();
-  scene.remove(spotLight);
-  scene.remove(lightCone);
-});
+document
+  .getElementById("resetSpotLightForm")
+  .addEventListener("submit", (event) => {
+    event.preventDefault();
+    scene.remove(spotLight);
+    scene.remove(lightCone);
+  });
 
 function getFormSpotLight() {
   const intensity = document.getElementById("spotLightIntensity").value;
@@ -817,7 +853,21 @@ function getFormSpotLight() {
   };
 }
 
-function createSpotLight({ intensity, angle, penumbra, decay, dirX, dirY, dirZ, posX, posY, posZ, R, G, B }) {
+function createSpotLight({
+  intensity,
+  angle,
+  penumbra,
+  decay,
+  dirX,
+  dirY,
+  dirZ,
+  posX,
+  posY,
+  posZ,
+  R,
+  G,
+  B,
+}) {
   scene.remove(spotTarget);
   const color = rgbToHex(R, G, B);
   const newSpotLight = new THREE.SpotLight(color);
