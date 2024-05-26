@@ -11,57 +11,57 @@
 
 <body class="d-flex justify-content-center align-items-center" style="height: 100vh;">
   <canvas class="d-block" id="gl-canvas" width="800" height="800"></canvas>
-  <!--TODO: Colocar os formulários a funcionar -->
+
   <div class="d-flex flex-column justify-content-evenly align-items-center menu">
-    <!--Aqui div de adicionar primitiva-->
+    <small class="text-center">Campos a vermelho são obrigatórios.</small>
     <div class="menu-div ms-3 d-flex flex-column align-items-center justify-content-center h-100 w-100">
-      <form id="addPrimitiveForm" class="d-flex flex-column align-items-center justify-content-center">
+      <form id="primitiveForm" class="d-flex flex-column align-items-center justify-content-center">
         <div class="d-flex">
-          <select class="form-select mb-2" id="primitiveType">
-            <option value="parallelepiped">Paralelipipedo</option>
+          <select class="form-select mb-2 border border-danger" id="primitiveType">
+            <option value="box">Paralelipipedo</option>
             <option value="pyramid">Piramide quadrangular</option>
           </select>
-          <input class="form-control mx-1" type="text" id="primitiveId" name="primitiveId" placeholder="ID" required style="width: 70px; height: 38px">
+          <input class="form-control mx-1 border border-danger" type="text" id="primitiveId" name="primitiveId" placeholder="ID" required style="width: 70px; height: 38px">
         </div>
         <div class="d-flex justify-content-evenly mb-2">
           <div>
-            <input class="form-control mx-1" type="number" id="primitiveHeight" name="primitiveHeight" placeholder="Altura" required style="width: 90px;" min="1" max="10">
+            <input class="form-control mx-1 border border-danger" type="number" id="primitiveHeight" name="primitiveHeight" placeholder="Altura" required style="width: 90px;" min="0" max="10">
           </div>
           <div>
-            <input class="form-control mx-1" type="number" id="primitiveWidth" name="primitiveWidth" placeholder="Largura" required style="width: 90px;" min="1" max="10">
+            <input class="form-control mx-1 border border-danger" type="number" id="primitiveWidth" name="primitiveWidth" placeholder="Largura" required style="width: 90px;" min="0" max="10">
           </div>
           <div>
-            <input class="form-control mx-1" type="number" id="primitiveDepth" name="primitiveDepth" placeholder="Profundidade" required style="width: 90px;" min="1" max="10">
+            <input class="form-control mx-1 border border-danger" type="number" id="primitiveDepth" name="primitiveDepth" placeholder="Profundidade" required style="width: 90px;" min="0" max="10">
           </div>
         </div>
         <div class="d-flex justify-content-evenly mb-2">
           <div>
-            <input class="form-control mx-1" type="number" id="primitiveX" name="primitiveX" placeholder="PosX" style="width: 90px;" max="4" min="-4">
+            <input class="form-control mx-1" type="number" id="primitiveX" name="primitiveX" placeholder="PosX" style="width: 90px;" min="-5" max="5">
           </div>
           <div>
-            <input class="form-control mx-1" type="number" id="primitiveY" name="primitiveY" placeholder="PosY" style="width: 90px;" max="9" min="0">
+            <input class="form-control mx-1" type="number" id="primitiveY" name="primitiveY" placeholder="PosY" style="width: 90px;" min="0" max="10">
           </div>
           <div>
-            <input class="form-control mx-1" type="number" id="primitiveZ" name="primitiveZ" placeholder="PosZ" style="width: 90px;" max="4" min="-4">
+            <input class="form-control mx-1" type="number" id="primitiveZ" name="primitiveZ" placeholder="PosZ" style="width: 90px;" min="-5" max="5">
           </div>
         </div>
         <div class="d-flex justify-content-evenly">
           <div>
-            <input class="form-control mx-1" type="number" id="primitiveRotationX" name="primitiveRotationX" placeholder="RotX" style="width: 90px;">
+            <input class="form-control mx-1" type="number" id="primitiveRotationX" name="primitiveRotationX" placeholder="RotX" style="width: 90px;" min="0" max="360">
           </div>
           <div>
-            <input class="form-control mx-1" type="number" id="primitiveRotationY" name="primitiveRotationY" placeholder="RotY" style="width: 90px;">
+            <input class="form-control mx-1" type="number" id="primitiveRotationY" name="primitiveRotationY" placeholder="RotY" style="width: 90px;" min="0" max="360">
           </div>
           <div>
-            <input class="form-control mx-1" type="number" id="primitiveRotationZ" name="primitiveRotationZ" placeholder="RotZ" style="width: 90px;">
+            <input class="form-control mx-1" type="number" id="primitiveRotationZ" name="primitiveRotationZ" placeholder="RotZ" style="width: 90px;" min="0" max="360">
           </div>
         </div>
         <div class="d-flex mt-2">
-          <select id="primitiveAttribute" class="form-select mx-1">
+          <select id="primitiveAttribute" class="form-select mx-1 border border-danger">
             <option value="color">Cor</option>
             <option value="texture">Textura</option>
           </select>
-          <select id="primitiveColor" class="form-select mx-1">
+          <select id="primitiveColor" class="form-select mx-1 border border-danger">
             <option value="red">Red</option>
             <option value="blue">Blue</option>
             <option value="yellow">Yellow</option>
@@ -73,14 +73,14 @@
             <option value="lime">Lime</option>
             <option value="pink">Pink</option>
           </select>
-          <select id="primitiveTexture" class="form-select mx-1" style="display: none;">
+          <select id="primitiveTexture" class="form-select mx-1 border border-danger" style="display: none;">
             <option value="metal.jpg">Metal</option>
             <option value="box.png">Box</option>
             <option value="wood.jpg">Wood</option>
             <option value="slime.jpg">Slime</option>
           </select>
         </div>
-        <button type="submit" class="btn btn-primary mt-2">Adicionar Primitiva</button>
+        <button id="createPrimitiveButton" type="submit" class="btn btn-primary mt-2">Adicionar Primitiva</button>
       </form>
     </div>
     <!--Aqui div de adicionar modelo e manipular objeto-->
@@ -92,9 +92,8 @@
       <form id="manipulateObjectForm" class="d-flex flex-column align-items-center justify-content-center">
         <div class="pt-4" style="border-top: 2px solid rgb(215, 214, 214); width: 200%;"></div>
 
-        <select id="manipulableObjectId" class="form-select mb-3">
+        <select id="manipulableObjectId" class="form-select mb-3 border border-danger">
           <option value="" selected>Selecione um objeto</option>
-
         </select>
         <button type="submit" class="btn btn-primary">Manipular Objeto</button>
       </form>
@@ -103,19 +102,19 @@
     <div class="menu-div ms-3 d-flex flex-column align-items-center justify-content-center h-100 w-100" style="border-bottom: 2px solid rgb(215, 214, 214);">
       <form id="addLightForm" class="d-flex flex-column align-items-center justify-content-center">
         <div class="d-flex justify-content-evenly mt-2">
-          <input class="form-control mx-1" type="number" id="lightPosX" name="lightPosX" placeholder="PosX" required style="width: 90px;" value="5">
-          <input class="form-control mx-1" type="number" id="lightPosY" name="lightPosY" placeholder="PosY" required style="width: 90px;" value="10">
-          <input class="form-control mx-1" type="number" id="lightPosZ" name="lightPosZ" placeholder="PosZ" required style="width: 90px;" value="8">
+          <input class="form-control mx-1 border border-danger" type="number" id="lightPosX" name="lightPosX" placeholder="PosX" required style="width: 90px;" value="5">
+          <input class="form-control mx-1 border border-danger" type="number" id="lightPosY" name="lightPosY" placeholder="PosY" required style="width: 90px;" value="10">
+          <input class="form-control mx-1 border border-danger" type="number" id="lightPosZ" name="lightPosZ" placeholder="PosZ" required style="width: 90px;" value="8">
         </div>
         <div class="d-flex justify-content-evenly mt-2">
-          <input class="form-control mx-1" type="number" id="lightDirX" name="lightDirX" placeholder="DirX" required style="width: 90px;" value="255">
-          <input class="form-control mx-1" type="number" id="lightDirY" name="lightDirY" placeholder="DirY" required style="width: 90px;" value="255">
-          <input class="form-control mx-1" type="number" id="lightDirZ" name="lightDirZ" placeholder="DirZ" required style="width: 90px;" value="255">
+          <input class="form-control mx-1 border border-danger" type="number" id="lightDirX" name="lightDirX" placeholder="DirX" required style="width: 90px;" value="255">
+          <input class="form-control mx-1 border border-danger" type="number" id="lightDirY" name="lightDirY" placeholder="DirY" required style="width: 90px;" value="255">
+          <input class="form-control mx-1 border border-danger" type="number" id="lightDirZ" name="lightDirZ" placeholder="DirZ" required style="width: 90px;" value="255">
         </div>
         <div class="d-flex justify-content-evenly mt-2">
-          <input class="form-control mx-1" type="number" id="lightColorR" name="lightColorR" placeholder="R" required style="width: 90px;" value="255" min="0" max="255">
-          <input class="form-control mx-1" type="number" id="lightColorG" name="lightColorG" placeholder="G" required style="width: 90px;" value="255" min="0" max="255">
-          <input class="form-control mx-1" type="number" id="lightColorB" name="lightColorB" placeholder="B" required style="width: 90px;" value="255" min="0" max="255">
+          <input class="form-control mx-1 border border-danger" type="number" id="lightColorR" name="lightColorR" placeholder="R" required style="width: 90px;" value="255" min="0" max="255">
+          <input class="form-control mx-1 border border-danger" type="number" id="lightColorG" name="lightColorG" placeholder="G" required style="width: 90px;" value="255" min="0" max="255">
+          <input class="form-control mx-1 border border-danger" type="number" id="lightColorB" name="lightColorB" placeholder="B" required style="width: 90px;" value="255" min="0" max="255">
         </div>
         <button type="submit" class="btn btn-primary mt-2 mb-2">Adicionar Luz</button>
       </form>
@@ -153,8 +152,8 @@
       }
     }
   </script>
-  <script src="js/utils.js"></script>
-  <script src="js/form.js"></script>
+  <script type="module" src="js/utils.js"></script>
+  <script type="module" src="js/form.js"></script>
   <script type="module" src="js/room.js"></script>
 </body>
 
