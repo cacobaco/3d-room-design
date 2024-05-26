@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PA Room Design</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body class="d-flex justify-content-center align-items-center" style="height: 100vh;">
+  <div class="d-flex mx-4 flex-column justify-content-evenly align-items-center menu">
+    <small class="text-center">Campos a vermelho são obrigatórios.</small>
+    <div class="ms-3 d-flex flex-column align-items-center justify-content-center h-100 w-100">
+      <form id="primitiveForm" class="d-flex flex-column align-items-center justify-content-center">
+        <div class="d-flex">
+          <select class="form-select mb-2 mt-3 border border-danger" id="primitiveType">
+            <option value="box">Paralelipipedo</option>
+            <option value="pyramid">Piramide quadrangular</option>
+          </select>
+          <input class="form-control mx-1 mt-3 border border-danger" type="text" id="primitiveId" name="primitiveId" placeholder="ID" required style="width: 70px; height: 38px">
+        </div>
+        <div class="d-flex justify-content-evenly mb-2">
+          <div>
+            <input class="form-control mx-1 border border-danger" type="number" id="primitiveHeight" name="primitiveHeight" placeholder="Altura" required style="width: 90px;" min="0" max="10">
+          </div>
+          <div>
+            <input class="form-control mx-1 border border-danger" type="number" id="primitiveWidth" name="primitiveWidth" placeholder="Largura" required style="width: 90px;" min="0" max="10">
+          </div>
+          <div>
+            <input class="form-control mx-1 border border-danger" type="number" id="primitiveDepth" name="primitiveDepth" placeholder="Profundidade" required style="width: 90px;" min="0" max="10">
+          </div>
+        </div>
+        <div class="d-flex justify-content-evenly mb-2">
+          <div>
+            <input class="form-control mx-1" type="number" id="primitiveX" name="primitiveX" placeholder="PosX" style="width: 90px;" min="-5" max="5" step="0.01">
+          </div>
+          <div>
+            <input class="form-control mx-1" type="number" id="primitiveY" name="primitiveY" placeholder="PosY" style="width: 90px;" min="0" max="10" step="0.01">
+          </div>
+          <div>
+            <input class="form-control mx-1" type="number" id="primitiveZ" name="primitiveZ" placeholder="PosZ" style="width: 90px;" min="-5" max="5" step="0.01">
+          </div>
+        </div>
+        <div class="d-flex justify-content-evenly">
+          <div>
+            <input class="form-control mx-1" type="number" id="primitiveRotationX" name="primitiveRotationX" placeholder="RotX" style="width: 90px;" min="0" max="360">
+          </div>
+          <div>
+            <input class="form-control mx-1" type="number" id="primitiveRotationY" name="primitiveRotationY" placeholder="RotY" style="width: 90px;" min="0" max="360">
+          </div>
+          <div>
+            <input class="form-control mx-1" type="number" id="primitiveRotationZ" name="primitiveRotationZ" placeholder="RotZ" style="width: 90px;" min="0" max="360">
+          </div>
+        </div>
+        <div class="d-flex mt-2">
+          <select id="primitiveAttribute" class="form-select mx-1 border border-danger" required>
+            <option value="color">Cor</option>
+            <option value="texture">Textura</option>
+          </select>
+          <select id="primitiveColor" class="form-select mx-1 border border-danger" required>
+            <option value="red">Red</option>
+            <option value="blue">Blue</option>
+            <option value="yellow">Yellow</option>
+            <option value="green">Green</option>
+            <option value="orange">Orange</option>
+            <option value="purple">Purple</option>
+            <option value="cyan">Cyan</option>
+            <option value="magenta">Magenta</option>
+            <option value="lime">Lime</option>
+            <option value="pink">Pink</option>
+          </select>
+          <select id="primitiveTexture" class="form-select mx-1 border border-danger" required style="display: none;">
+            <option value="metal.jpg">Metal</option>
+            <option value="box.png">Box</option>
+            <option value="wood.jpg">Wood</option>
+            <option value="slime.jpg">Slime</option>
+          </select>
+        </div>
+        <button id="createPrimitiveButton" type="submit" class="btn btn-primary mt-2 mb-3">Adicionar Primitiva</button>
+      </form>
+    </div>
+    <!--Aqui div de adicionar modelo e manipular objeto-->
+    <div class="menu-div ms-3 d-flex flex-column align-items-center justify-content-evenly h-100 w-100">
+      <form id="addModel" class="d-flex mt-3 flex-column align-items-center justify-content-center">
+        <input class="mb-3 form-control" type="file" id="file" name="file" accept=".obj">
+        <button type="submit" class="btn btn-primary mb-3">Adicionar Modelo</button>
+      </form>
+    </div>
+    <div class="menu-div ms-3 d-flex flex-column align-items-center justify-content-evenly h-100 w-100">
+      <form id="manipulateObjectForm" class="d-flex flex-column align-items-center justify-content-center">
+        <select id="manipulableObjectId" class="form-select mb-3 mt-3 border border-danger">
+          <option value="" selected>Selecione um objeto</option>
+        </select>
+        <button id="manipulateObjectButton" type="button" class="btn btn-primary mb-3">Manipular Objeto</button>
+        <button id="deleteObjectButton" type="button" class="btn btn-primary mb-3">Apagar Objeto</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal fade" tabindex="-1" id="errorModal">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="errorModalTitle">Erro</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p id="errorModalMessage">Ocorreu um erro.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+  <canvas class="d-block border border-3 border-black" id="gl-canvas" width="800" height="800"></canvas>
+
+
+
+  <!--Aqui div de adicionar luz-->
+  <div class="menu-div ms-3 d-flex flex-column align-items-center justify-content-center h-100" style="border-bottom: 2px solid rgb(215, 214, 214);">
+    <small class="text-center">Campos a vermelho são obrigatórios.</small>
+    <select id="lightType" class="form-select mt-3">
+      <option value="directional">Direcional</option>
+      <option value="ambiental">Ambiental</option>
+      <option value="point">Ponto</option>
+      <option value="holo">Holofote</option>
+    </select>
+    <form id="addDirectionalLightForm" class="flex-column align-items-center justify-content-center">
+      <div class="d-flex flex-column align-items-center justify-content-center">
+        <div class="d-flex justify-content-evenly mt-2">
+          <input class="form-control mx-1 border border-danger" type="number" id="lightPosX" name="lightPosX" placeholder="PosX" required style="width: 90px;" value="5">
+          <input class="form-control mx-1 border border-danger" type="number" id="lightPosY" name="lightPosY" placeholder="PosY" required style="width: 90px;" value="10">
+          <input class="form-control mx-1 border border-danger" type="number" id="lightPosZ" name="lightPosZ" placeholder="PosZ" required style="width: 90px;" value="8">
+        </div>
+        <div class="d-flex justify-content-evenly mt-2">
+          <input class="form-control mx-1 border border-danger" type="number" id="lightDirX" name="lightDirX" placeholder="DirX" required style="width: 90px;" value="0">
+          <input class="form-control mx-1 border border-danger" type="number" id="lightDirY" name="lightDirY" placeholder="DirY" required style="width: 90px;" value="0">
+          <input class="form-control mx-1 border border-danger" type="number" id="lightDirZ" name="lightDirZ" placeholder="DirZ" required style="width: 90px;" value="0">
+        </div>
+        <div class="d-flex justify-content-evenly mt-2">
+          <input class="form-control mx-1 border border-danger" type="number" id="lightColorR" name="lightColorR" placeholder="R" required style="width: 90px;" value="255" min="0" max="255">
+          <input class="form-control mx-1 border border-danger" type="number" id="lightColorG" name="lightColorG" placeholder="G" required style="width: 90px;" value="255" min="0" max="255">
+          <input class="form-control mx-1 border border-danger" type="number" id="lightColorB" name="lightColorB" placeholder="B" required style="width: 90px;" value="255" min="0" max="255">
+        </div>
+        <button type="submit" class="btn btn-primary mt-2 mb-2">Adicionar Luz</button>
+      </div>
+    </form>
+    <form id="resetDirectionalLightForm" class="flex-column align-items-center justify-content-center">
+      <div class="d-flex flex-column align-items-center justify-content-center">
+        <div class="pt-2" style="border-top: 2px solid rgb(215, 214, 214); width: 200%;"></div>
+        <button type="submit" class="btn btn-primary mb-2">Apagar Luz</button>
+      </div>
+    </form>
+    <form id="addAmbientLightForm" class="flex-column align-items-center justify-content-center" style="display: none">
+      <div class="d-flex flex-column align-items-center justify-content-center">
+        <div class="d-flex justify-content-evenly mt-2">
+          <input class="form-control mx-1 border border-danger" type="number" id="ambientLightIntensity" name="ambientLightIntensity" placeholder="Intensidade" value="1" required style="width: 90px;">
+        </div>
+        <div class="d-flex justify-content-evenly mt-2">
+          <input class="form-control mx-1 border border-danger" type="number" id="ambientLightR" name="lightColorR" placeholder="R" required style="width: 90px;" min="0" max="255">
+          <input class="form-control mx-1 border border-danger" type="number" id="ambientLightG" name="lightColorG" placeholder="G" required style="width: 90px;" min="0" max="255">
+          <input class="form-control mx-1 border border-danger" type="number" id="ambientLightB" name="lightColorB" placeholder="B" required style="width: 90px;" min="0" max="255">
+        </div>
+        <button type="submit" class="btn btn-primary mt-2 mb-2">Adicionar Luz</button>
+      </div>
+    </form>
+    <form id="resetAmbientLightForm" class="flex-column align-items-center justify-content-center" style="display: none">
+      <div class="d-flex flex-column align-items-center justify-content-center">
+        <div class="pt-2" style="border-top: 2px solid rgb(215, 214, 214); width: 200%;"></div>
+        <button type="submit" class="btn btn-primary mb-2">Apagar Luz</button>
+      </div>
+    </form>
+    <form id="addPointLightForm" class="flex-column align-items-center justify-content-center" style="display: none">
+      <div class="d-flex flex-column align-items-center justify-content-center">
+        <div class="d-flex justify-content-evenly mt-2">
+          <input class="form-control mx-1 border border-danger" type="number" id="pointLightIntensity" name="pointLightIntensity" placeholder="Intensidade" required style="width: 90px;">
+          <input class="form-control mx-1 border border-danger" type="number" id="pointLightDecay" name="decay" placeholder="Decadência" required style="width: 90px;" value="1">
+        </div>
+        <div class="d-flex justify-content-evenly mt-2">
+          <input class="form-control mx-1 border border-danger" type="number" id="pointLightPosX" name="pointLightPosX" placeholder="PosX" required style="width: 90px;" value="1">
+          <input class="form-control mx-1 border border-danger" type="number" id="pointLightPosY" name="pointLightPosY" placeholder="PosY" required style="width: 90px;" value="1">
+          <input class="form-control mx-1 border border-danger" type="number" id="pointLightPosZ" name="pointLightPosZ" placeholder="PosZ" required style="width: 90px;" value="1">
+        </div>
+        <div class="d-flex justify-content-evenly mt-2">
+          <input class="form-control mx-1 border border-danger" type="number" id="pointLightR" name="pointLightColorR" placeholder="R" required style="width: 90px;" min="0" max="255">
+          <input class="form-control mx-1 border border-danger" type="number" id="pointLightG" name="pointLightColorG" placeholder="G" required style="width: 90px;" min="0" max="255">
+          <input class="form-control mx-1 border border-danger" type="number" id="pointLightB" name="pointLightColorB" placeholder="B" required style="width: 90px;" min="0" max="255">
+        </div>
+        <button type="submit" class="btn btn-primary mt-2 mb-2">Adicionar Luz</button>
+      </div>
+    </form>
+    <form id="resetPointLightForm" class="flex-column align-items-center justify-content-center" style="display: none">
+      <div class="d-flex flex-column align-items-center justify-content-center">
+        <div class="pt-2" style="border-top: 2px solid rgb(215, 214, 214); width: 200%;"></div>
+        <button type="submit" class="btn btn-primary mb-2">Apagar Luz</button>
+      </div>
+    </form>
+    <form id="addSpotLightForm" class="flex-column align-items-center justify-content-center" style="display: none">
+      <div class="d-flex flex-column align-items-center justify-content-center">
+        <div class="d-flex justify-content-evenly mt-2">
+          <input class="form-control mx-1 border border-danger" type="number" id="spotLightPenumbra" name="penumbra" placeholder="Penumbra" required style="width: 110px;" value="0" min="0">
+          <input class="form-control mx-1 border border-danger" type="number" id="spotLightAngle" name="angle" placeholder="Ângulo" required style="width: 110px;" value="1">
+        </div>
+        <div class="d-flex justify-content-evenly mt-2">
+          <input class="form-control mx-1 border border-danger" type="number" id="spotLightIntensity" name="spotLightIntensity" placeholder="Intensidade" required style="width: 90px;">
+          <input class="form-control mx-1 border border-danger" type="number" id="spotLightDecay" name="decay" placeholder="Decadência" required style="width: 90px;" value="1" min="0">
+        </div>
+        <div class="d-flex justify-content-evenly mt-2">
+          <input class="form-control mx-1 border border-danger" type="number" id="spotLightDirX" name="spotLightDirX" placeholder="DirX" required style="width: 90px;">
+          <input class="form-control mx-1 border border-danger" type="number" id="spotLightDirY" name="spotLightDirY" placeholder="DirY" required style="width: 90px;">
+          <input class="form-control mx-1 border border-danger" type="number" id="spotLightDirZ" name="spotLightDirZ" placeholder="DirZ" required style="width: 90px;">
+        </div>
+        <div class="d-flex justify-content-evenly mt-2">
+          <input class="form-control mx-1 border border-danger" type="number" id="spotLightPosX" name="spotLightPosX" placeholder="PosX" required style="width: 90px;" value="1">
+          <input class="form-control mx-1 border border-danger" type="number" id="spotLightPosY" name="spotLightPosY" placeholder="PosY" required style="width: 90px;" value="1">
+          <input class="form-control mx-1 border border-danger" type="number" id="spotLightPosZ" name="spotLightPosZ" placeholder="PosZ" required style="width: 90px;" value="1">
+        </div>
+        <div class="d-flex justify-content-evenly mt-2">
+          <input class="form-control mx-1 border border-danger" type="number" id="spotLightR" name="spotLightR" placeholder="R" required style="width: 90px;" min="0" max="255">
+          <input class="form-control mx-1 border border-danger" type="number" id="spotLightG" name="spotLightG" placeholder="G" required style="width: 90px;" min="0" max="255">
+          <input class="form-control mx-1 border border-danger" type="number" id="spotLightB" name="spotLightB" placeholder="B" required style="width: 90px;" min="0" max="255">
+        </div>
+        <button type="submit" class="btn btn-primary mt-2 mb-2">Adicionar Luz</button>
+      </div>
+    </form>
+    <form id="resetSpotLightForm" class="flex-column align-items-center justify-content-center" style="display: none">
+      <div class="d-flex flex-column align-items-center justify-content-center">
+        <div class="pt-2" style="border-top: 2px solid rgb(215, 214, 214); width: 200%;"></div>
+        <button type="submit" class="btn btn-primary mb-2">Apagar Luz</button>
+      </div>
+    </form>
+  </div>
+
+  
+
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.164.1/examples/jsm/"
+      }
+    }
+  </script>
+  <script type="module" src="js/utils.js"></script>
+  <script type="module" src="js/form.js"></script>
+  <script type="module" src="js/room.js"></script>
+</body>
+
+</html>
