@@ -1,6 +1,12 @@
 import * as THREE from "three";
 import { PointerLockControls } from "three/addons/controls/PointerLockControls.js";
 import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
+import {
+  addManipulableObjectOption,
+  removeManipulableObjectOption,
+  updateSelectedManipulableObject,
+} from "./form.js";
+import { rgbToHex, showErrorModal } from "./utils.js";
 
 // Criar cena, câmera e renderizador
 const scene = new THREE.Scene();
@@ -82,11 +88,15 @@ document
 
 // Event listeners para teclas
 window.addEventListener("keydown", (event) => {
-  keysPressed[event.key] = true;
+  keysPressed[event.key.toLowerCase()] = true;
 });
 
 window.addEventListener("keyup", (event) => {
-  keysPressed[event.key] = false;
+  keysPressed[event.key.toLowerCase()] = false;
+
+  if (event.key === "CapsLock" && selectedPrimitive) {
+    primitiveCollisionsEnabled = !primitiveCollisionsEnabled;
+  }
 });
 
 // Controle de movimento WASD
@@ -147,50 +157,52 @@ document.getElementById("gl-canvas").addEventListener("click", () => {
  * @property {number} height - The height of the primitive.
  * @property {number} width - The width of the primitive.
  * @property {number} depth - The depth of the primitive.
- * @property {number} x - The x-coordinate of the primitive.
- * @property {number} y - The y-coordinate of the primitive.
- * @property {number} z - The z-coordinate of the primitive.
+ * @property {number} initialX - The x-coordinate of the primitive.
+ * @property {number} initialY - The y-coordinate of the primitive.
+ * @property {number} initialZ - The z-coordinate of the primitive.
  * @property {number} rotationX - The x-axis rotation of the primitive.
  * @property {number} rotationY - The y-axis rotation of the primitive.
  * @property {number} rotationZ - The z-axis rotation of the primitive.
  * @property {string} attribute - The attribute of the primitive.
  * @property {string} attributeValue - The value of the attribute.
+ * @property {THREE.Mesh | undefined} mesh - The mesh object of the primitive.
  */
 
 const maxPrimitives = 10;
-const meshes = {};
+const primitives = {};
 
-document
-  .getElementById("addPrimitiveForm")
-  .addEventListener("submit", (event) => {
-    event.preventDefault();
+document.getElementById("primitiveForm").addEventListener("submit", (event) => {
+  event.preventDefault();
 
-    const count = Object.keys(meshes).length;
+  const count = Object.keys(primitives).length;
 
-    if (count >= maxPrimitives) {
-      showErrorModal(
-        "Erro",
-        `O número máximo de primitivas foi atingido (${count}/${maxPrimitives}).`
-      );
-      return;
-    }
+  if (count >= maxPrimitives) {
+    showErrorModal(
+      "Erro",
+      `O número máximo de primitivas foi atingido (${count}/${maxPrimitives}).`
+    );
+    return;
+  }
 
-    try {
-      const primitive = getFormPrimitive();
-      createPrimitive(primitive);
-    } catch (error) {
-      showErrorModal("Erro", error.message);
-    }
-  });
+  const isUpdate =
+    document.getElementById("createPrimitiveButton").textContent ===
+    "Atualizar Primitiva";
+
+  try {
+    const primitiveData = getFormPrimitiveData();
+    const primitive = parsePrimitive(primitiveData, !isUpdate);
+    createPrimitive(primitive);
+  } catch (error) {
+    showErrorModal("Erro", error.message);
+  }
+});
 
 /**
- * Retrieves form inputs and returns a primitive object based on the input values.
+ * Retrieves the form data for a primitive object.
  *
- * @returns {Primitive} The primitive object.
- *
- * @throws If a primitive with the same id already exists. Thrown by {@link parsePrimitive}.
+ * @returns {Object} The primitive data object.
  */
-function getFormPrimitive() {
+function getFormPrimitiveData() {
   const id = document.getElementById("primitiveId").value;
   const type = document.getElementById("primitiveType").value;
 
@@ -200,9 +212,9 @@ function getFormPrimitive() {
   const depth = document.getElementById("primitiveDepth").value;
 
   // Get the primitive position
-  const x = document.getElementById("primitiveX").value;
-  const y = document.getElementById("primitiveY").value;
-  const z = document.getElementById("primitiveZ").value;
+  const initialX = document.getElementById("primitiveX").value;
+  const initialY = document.getElementById("primitiveY").value;
+  const initialZ = document.getElementById("primitiveZ").value;
 
   // Get the primitive rotation
   const rotationX = document.getElementById("primitiveRotationX").value;
@@ -216,23 +228,21 @@ function getFormPrimitive() {
       ? document.getElementById("primitiveTexture").value
       : document.getElementById("primitiveColor").value;
 
-  const primitive = parsePrimitive({
+  return {
     id,
     type,
     height,
     width,
     depth,
-    x,
-    y,
-    z,
+    initialX,
+    initialY,
+    initialZ,
     rotationX,
     rotationY,
     rotationZ,
     attribute,
     attributeValue,
-  });
-
-  return primitive;
+  };
 }
 
 /**
@@ -244,60 +254,61 @@ function getFormPrimitive() {
  * @param {string} primitive.height - The height of the primitive.
  * @param {string} primitive.width - The width of the primitive.
  * @param {string} primitive.depth - The depth of the primitive.
- * @param {string} primitive.x - The x-coordinate of the primitive.
- * @param {string} primitive.y - The y-coordinate of the primitive.
- * @param {string} primitive.z - The z-coordinate of the primitive.
+ * @param {string} primitive.initialX - The initial x-coordinate of the primitive.
+ * @param {string} primitive.initialY - The initial y-coordinate of the primitive.
+ * @param {string} primitive.initialZ - The initial z-coordinate of the primitive.
  * @param {string} primitive.rotationX - The x-axis rotation of the primitive.
  * @param {string} primitive.rotationY - The y-axis rotation of the primitive.
  * @param {string} primitive.rotationZ - The z-axis rotation of the primitive.
  * @param {string} primitive.attribute - The attribute of the primitive.
  * @param {string} primitive.attributeValue - The value of the attribute.
+ * @param {boolean} [checkExistingId=true] - Whether to check if a primitive with the same id already exists.
  *
  * @returns {Primitive} The parsed primitive object.
  *
  * @throws If the id field is empty.
  * @throws If a primitive with the same id already exists.
  */
-function parsePrimitive({
-  id,
-  type,
-  height,
-  width,
-  depth,
-  x,
-  y,
-  z,
-  rotationX,
-  rotationY,
-  rotationZ,
-  attribute,
-  attributeValue,
-}) {
+function parsePrimitive(
+  {
+    id,
+    type,
+    height,
+    width,
+    depth,
+    initialX,
+    initialY,
+    initialZ,
+    rotationX,
+    rotationY,
+    rotationZ,
+    attribute,
+    attributeValue,
+  },
+  checkExistingId = true
+) {
   const parsedId = id.trim();
 
   if (!parsedId) {
     throw new Error("O campo 'ID' é obrigatório.");
   }
 
-  if (meshes[parsedId]) {
+  if (checkExistingId && primitives[parsedId]) {
     throw new Error(`Já existe uma primitiva com o id "${parsedId}".`);
   }
 
-  const parsedType = type === "pyramid" ? "pyramid" : "box";
-
   return {
     id: parsedId,
-    type: parsedType,
+    type,
     height: parseFloat(height) || 1,
     width: parseFloat(width) || 1,
     depth: parseFloat(depth) || 1,
-    x: parseFloat(x) || 0,
-    y: parseFloat(y) || height / 2,
-    z: parseFloat(z) || 0,
+    initialX: parseFloat(initialX) || 0,
+    initialY: parseFloat(initialY) || height / 2,
+    initialZ: parseFloat(initialZ) || 0,
     rotationX: parseFloat(rotationX) || 0,
     rotationY: parseFloat(rotationY) || 0,
     rotationZ: parseFloat(rotationZ) || 0,
-
     attribute,
     attributeValue,
   };
@@ -310,17 +321,15 @@ function parsePrimitive({
  * @param {Primitive} primitive - The primitive object.
  */
 function createPrimitive(primitive) {
-  if (meshes[primitive.id]) {
-    removeManipulableObjectOption(primitive.id);
-    scene.remove(meshes[primitive.id]);
-    delete meshes[primitive.id];
+  if (primitives[primitive.id]) {
+    deletePrimitive(primitive.id);
   }
 
   const geometry = getPrimitiveGeometry(primitive);
   const material = getPrimitiveMaterial(primitive);
   const mesh = new THREE.Mesh(geometry, material);
 
-  mesh.position.set(primitive.x, primitive.y, primitive.z);
+  mesh.position.set(primitive.initialX, primitive.initialY, primitive.initialZ);
 
   mesh.rotation.set(
     THREE.MathUtils.degToRad(primitive.rotationX),
@@ -328,9 +337,29 @@ function createPrimitive(primitive) {
     THREE.MathUtils.degToRad(primitive.rotationZ)
   );
 
-  meshes[primitive.id] = mesh;
+  primitive.mesh = mesh;
+  primitives[primitive.id] = primitive;
+
+  if (!isPrimitiveInsideRoom(primitive)) {
+    delete primitives[primitive.id];
+    showErrorModal("Erro", "A primitiva não pode ser criada fora da sala.");
+    return;
+  }
+
   scene.add(mesh);
   addManipulableObjectOption(primitive.id);
+}
+
+function deletePrimitive(id) {
+  if (!primitives[id]) {
+    showErrorModal("Erro", `Não existe uma primitiva com o id "${id}".`);
+    return;
+  }
+
+  removeManipulableObjectOption(id);
+  deselectObject();
+  scene.remove(primitives[id].mesh);
+  delete primitives[id];
 }
 
 /**
@@ -372,10 +401,29 @@ function getPrimitiveMaterial({ attribute, attributeValue }) {
   return new THREE.MeshPhongMaterial({ color: attributeValue });
 }
 
+function isPrimitiveInsideRoom(primitive) {
+  const box = new THREE.Box3().setFromObject(primitive.mesh);
+
+  if (box.min.x < -5 || box.max.x > 5) {
+    return false;
+  }
+
+  if (box.min.y < 0 || box.max.y > 10) {
+    return false;
+  }
+
+  if (box.min.z < -5 || box.max.z > 5) {
+    return false;
+  }
+
+  return true;
+}
+
 // ***************************
 // * PRIMITIVES MANIPULATION *
 // ***************************
-let selectedMesh = null;
+let selectedPrimitive = null;
+let primitiveCollisionsEnabled = false;
 
 document
   .getElementById("manipulateObjectForm")
@@ -388,7 +436,7 @@ document
       return;
     }
 
-    if (!meshes[id]) {
+    if (!primitives[id]) {
       showErrorModal("Erro", `Não existe uma primitiva com o id "${id}".`);
       return;
     }
@@ -397,59 +445,100 @@ document
   });
 
 function updateSelectedObject() {
-  if (!selectedMesh) {
+  if (!selectedPrimitive) {
     return;
   }
 
-  if (keysPressed["Enter"]) {
+  if (keysPressed["enter"]) {
     deselectObject();
     return;
   }
 
-  if (keysPressed["ArrowUp"]) {
-    selectedMesh.position.z -= 0.05;
+  const translation = new THREE.Vector3();
+
+  if (keysPressed["arrowup"]) {
+    translation.z -= 0.05;
   }
-  if (keysPressed["ArrowDown"]) {
-    selectedMesh.position.z += 0.05;
+  if (keysPressed["arrowdown"]) {
+    translation.z += 0.05;
   }
-  if (keysPressed["ArrowLeft"]) {
-    selectedMesh.position.x -= 0.05;
+  if (keysPressed["arrowleft"]) {
+    translation.x -= 0.05;
   }
-  if (keysPressed["ArrowRight"]) {
-    selectedMesh.position.x += 0.05;
+  if (keysPressed["arrowright"]) {
+    translation.x += 0.05;
   }
-  if (keysPressed["PageUp"]) {
-    selectedMesh.position.y += 0.05;
+  if (keysPressed["pageup"]) {
+    translation.y += 0.05;
   }
-  if (keysPressed["PageDown"]) {
-    selectedMesh.position.y -= 0.05;
+  if (keysPressed["pagedown"]) {
+    translation.y -= 0.05;
+  }
+
+  const box = new THREE.Box3().setFromObject(selectedPrimitive.mesh);
+  const newBox = box.clone().translate(translation);
+
+  if (newBox.min.x < -5 || newBox.max.x > 5) {
+    translation.x = 0;
+  }
+
+  if (newBox.min.y < 0 || newBox.max.y > 10) {
+    translation.y = 0;
+  }
+
+  if (newBox.min.z < -5 || newBox.max.z > 5) {
+    translation.z = 0;
+  }
+
+  if (primitiveCollisionsEnabled) {
+    for (const id in primitives) {
+      if (id === selectedPrimitive.id) {
+        continue;
+      }
+
+      const primitive = primitives[id];
+      const otherBox = new THREE.Box3().setFromObject(primitive.mesh);
+
+      if (newBox.intersectsBox(otherBox)) {
+        translation.set(0, 0, 0);
+        break;
+      }
+    }
+  }
+
+  if (translation.length() > 0) {
+    selectedPrimitive.mesh.position.add(translation);
   }
 
   requestAnimationFrame(updateSelectedObject);
 }
 
 function selectObject(id) {
-  if (!meshes[id]) {
+  if (!primitives[id]) {
     throw new Error(`Não existe uma primitiva com o id "${id}".`);
   }
 
-  if (selectedMesh) {
+  if (selectedPrimitive) {
     deselectObject();
   }
 
-  selectedMesh = meshes[id];
-  addBorder(selectedMesh);
+  selectedPrimitive = primitives[id];
+  addBorder(selectedPrimitive.mesh);
 
-  updateSelectedObject(id);
+  updateSelectedObject(selectedPrimitive.id);
+
+  updateSelectedManipulableObject(selectedPrimitive);
 }
 
 function deselectObject() {
-  if (!selectedMesh) {
+  if (!selectedPrimitive) {
     return;
   }
 
-  removeBorder(selectedMesh);
-  selectedMesh = null;
+  removeBorder(selectedPrimitive.mesh);
+  selectedPrimitive = null;
+
+  updateSelectedManipulableObject();
 }
 
 function addBorder(mesh) {
