@@ -454,12 +454,10 @@ function updateSelectedObject() {
     }
   }
 
-  if (translation.length() === 0) {
-    requestAnimationFrame(updateSelectedObject);
-    return;
+  if (translation.length() > 0) {
+    selectedPrimitive.mesh.position.add(translation);
   }
 
-  selectedPrimitive.mesh.position.add(translation);
   requestAnimationFrame(updateSelectedObject);
 }
 
