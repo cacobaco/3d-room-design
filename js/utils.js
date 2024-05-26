@@ -7,8 +7,8 @@
  *
  * @returns {number} The hexadecimal color representation.
  */
-function rgbToHex(r, g, b) {
-  return ((r << 16) | (g << 8) | b);
+export function rgbToHex(r, g, b) {
+  return (r << 16) | (g << 8) | b;
 }
 
 /**
@@ -17,7 +17,7 @@ function rgbToHex(r, g, b) {
  * @param {string} title - The title of the error modal.
  * @param {string} message - The message to be displayed in the error modal.
  */
-function showErrorModal(title, message) {
+export function showErrorModal(title, message) {
   document.getElementById("errorModalTitle").textContent = title;
   document.getElementById("errorModalMessage").textContent = message;
   $("#errorModal").modal("show");
@@ -26,6 +26,6 @@ function showErrorModal(title, message) {
 /**
  * Hides the error modal.
  */
-function hideErrorModal() {
+export function hideErrorModal() {
   $("#errorModal").modal("hide");
 }
