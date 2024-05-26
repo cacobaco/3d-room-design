@@ -16,7 +16,6 @@ renderer.setClearColor(0x87ceeb);
 renderer.shadowMap.enabled = true; // Habilitar sombras
 renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Tipo de sombra (suavização)
 
-
 // Material para paredes e chão
 const wallTexture = new THREE.TextureLoader().load("../textures/wall.jpg");
 const wallMaterial = new THREE.MeshPhongMaterial({
@@ -454,6 +453,8 @@ let sphere = null;
 let arrowHelper = null;
 let lightCone = null;
 
+let directionalTarget = null;
+
 function createLightSphere(position, color) {
   scene.remove(sphere);
   const sphereGeometry = new THREE.SphereGeometry(0.5, 16, 16);
@@ -465,9 +466,8 @@ function createLightSphere(position, color) {
 
 function createArrowHelper(newDirectionalLight, color) {
   scene.remove(arrowHelper);
-  const direction = new THREE.Vector3();
-  newDirectionalLight.getWorldDirection(direction);
-  arrowHelper = new THREE.ArrowHelper(direction, newDirectionalLight.position, 2, color);
+  const dirVector = new THREE.Vector3().subVectors(directionalTarget.position, newDirectionalLight.position).normalize();
+  arrowHelper = new THREE.ArrowHelper(dirVector, newDirectionalLight.position, 3, color);
   scene.add(arrowHelper);
 }
 
@@ -546,10 +546,14 @@ function parseLight({ posX, posY, posZ, dirX, dirY, dirZ, R, G, B }) {
 }
 
 function createLight({ posX, posY, posZ, dirX, dirY, dirZ, R, G, B }) {
+  scene.remove(directionalTarget);
   const color = rgbToHex(R, G, B);
   const newDirectionalLight = new THREE.DirectionalLight(color, 1.4);
   newDirectionalLight.position.set(posX, posY, posZ);
-  newDirectionalLight.lookAt(dirX, dirY, dirZ);
+  directionalTarget = new THREE.Object3D();
+  directionalTarget.position.set(dirX, dirY, dirZ);
+  scene.add(directionalTarget);
+  newDirectionalLight.target = directionalTarget;
   newDirectionalLight.castShadow = true;
   newDirectionalLight.shadow.mapSize.width = 2048;
   newDirectionalLight.shadow.mapSize.height = 2048;
@@ -559,6 +563,7 @@ function createLight({ posX, posY, posZ, dirX, dirY, dirZ, R, G, B }) {
   createArrowHelper(newDirectionalLight, color);
   directionalLight = newDirectionalLight;
 }
+
 
 // *************
 // * AMBIENTAL *
