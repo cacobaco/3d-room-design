@@ -15,7 +15,6 @@ const renderer = new THREE.WebGLRenderer({
 });
 renderer.setSize(800, 800);
 
-
 // Configurar cor de fundo do renderizador
 renderer.setClearColor(0x87ceeb);
 
