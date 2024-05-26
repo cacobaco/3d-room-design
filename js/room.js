@@ -102,11 +102,11 @@ window.addEventListener("keydown", (event) => {
 });
 
 window.addEventListener("keyup", (event) => {
+  keysPressed[event.key.toLowerCase()] = false;
+
   if (!controls.enabled) {
     return;
   }
-
-  keysPressed[event.key.toLowerCase()] = false;
 
   if (event.key === "CapsLock" && selectedPrimitive) {
     primitiveCollisionsEnabled = !primitiveCollisionsEnabled;
