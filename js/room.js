@@ -648,7 +648,6 @@ function createLight({ posX, posY, posZ, dirX, dirY, dirZ, R, G, B }) {
   directionalLight = newDirectionalLight;
 }
 
-
 // *************
 // * AMBIENTAL *
 // *************
