@@ -57,11 +57,11 @@
           </div>
         </div>
         <div class="d-flex mt-2">
-          <select id="primitiveAttribute" class="form-select mx-1 border border-danger">
+          <select id="primitiveAttribute" class="form-select mx-1 border border-danger" required>
             <option value="color">Cor</option>
             <option value="texture">Textura</option>
           </select>
-          <select id="primitiveColor" class="form-select mx-1 border border-danger">
+          <select id="primitiveColor" class="form-select mx-1 border border-danger" required>
             <option value="red">Red</option>
             <option value="blue">Blue</option>
             <option value="yellow">Yellow</option>
@@ -73,7 +73,7 @@
             <option value="lime">Lime</option>
             <option value="pink">Pink</option>
           </select>
-          <select id="primitiveTexture" class="form-select mx-1 border border-danger" style="display: none;">
+          <select id="primitiveTexture" class="form-select mx-1 border border-danger" required style="display: none;">
             <option value="metal.jpg">Metal</option>
             <option value="box.png">Box</option>
             <option value="wood.jpg">Wood</option>
@@ -95,7 +95,8 @@
         <select id="manipulableObjectId" class="form-select mb-3 border border-danger">
           <option value="" selected>Selecione um objeto</option>
         </select>
-        <button type="submit" class="btn btn-primary mb-3">Manipular Objeto</button>
+        <button id="manipulateObjectButton" type="button" class="btn btn-primary mb-3">Manipular Objeto</button>
+        <button id="deleteObjectButton" type="button" class="btn btn-primary mb-3">Apagar Objeto</button>
       </form>
     </div>
     <!--Aqui div de adicionar luz-->
