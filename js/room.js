@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { PointerLockControls } from "three/addons/controls/PointerLockControls.js";
-
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
+
 
 const loader = new OBJLoader();
 
@@ -53,70 +53,52 @@ let moveSpeed = 0.1;
 const keysPressed = {};
 
 
-/*loader.load(
-    // resource URL
-    '../modelos/bird.obj',
-    // called when resource is loaded
-    function ( object ) {
-      scene.add( object );
-      object.scale.set(0.05, 0.05, 0.05);
-      object.position.set(0, 2, 0);
-      object.rotation.x = THREE.MathUtils.degToRad(90); // Rotation around the X-axis
-      object.rotation.y = THREE.MathUtils.degToRad(180); // Rotation around the Y-axis
-      object.rotation.z = THREE.MathUtils.degToRad(180); // Rotation around the Z-axis
-    },
-    // called when loading is in progresses
-    function ( xhr ) {
-      console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
-    },
-    // called when loading has errors
-    function ( error ) {
-      console.log( 'An error happened' );
-    }
-);*/
-// Get the form and the file input
-var form = document.getElementById('addModel');
-var fileInput = document.getElementById('file');
+/**
+ *
+ * @property {HTMLElement} form - The form element used for model submission.
+ * @property {HTMLElement} fileInput - The input element used for file selection.
+ * @property {File} file - The selected file from the file input.
+ * @property {FileReader} reader - The FileReader instance used to read the file.
+ * @property {string} contents - The contents of the file read as text.
+ * @property {THREE.Group} object - The 3D model parsed from the file contents.
+ * @property {THREE.Box3} boundingBox - The bounding box of the 3D model.
+ * @property {THREE.Vector3} modelSize - The original size of the 3D model.
+ * @property {THREE.Vector3} roomSize - The size of the "room" in the 3D scene.
+ * @property {number} scaleFactor - The factor used to scale the model to fit in the room.
+ *
+ */
 
+// Recebe os inputs do formulário para o modelo
+const form = document.getElementById('addModel');
+const fileInput = document.getElementById('file');
+
+// Event listener para adicionar o modelo
 form.addEventListener('submit', function(event) {
-  // Prevent the form from submitting normally
+  // Impede a pagina de atualizar
   event.preventDefault();
 
-  // Get the file from the file input
-  var file = fileInput.files[0];
-
-  // Create a FileReader to read the file
-  var reader = new FileReader();
+  const file = fileInput.files[0];
+  const reader = new FileReader();
 
   reader.addEventListener('load', function(event) {
     // Parse the file content and load the model
-    var contents = event.target.result;
-    var object = loader.parse(contents);
+    const contents = event.target.result;
+    const object = loader.parse(contents);
 
-    // Calculate the bounding box of the model
-    var boundingBox = new THREE.Box3().setFromObject(object);
+    // calcula o tamanho do modelo e do ambiente para ajustar o tamanho do modelo
+    const boundingBox = new THREE.Box3().setFromObject(object);
+    const modelSize = boundingBox.getSize(new THREE.Vector3());
+    const roomSize = new THREE.Vector3(10, 10, 10);
 
-    // Calculate the size of the bounding box
-    var modelSize = boundingBox.getSize(new THREE.Vector3());
-    console.log('Model size:', modelSize);
-
-    // Define the size of the room
-    var roomSize = new THREE.Vector3(10, 10, 10); // Replace with the actual size of your room
-    console.log('Room size:', roomSize);
-
-    // Calculate the scale factor
-    var scaleFactor = Math.min(
+    const scaleFactor = Math.min(
         roomSize.x / modelSize.x,
         roomSize.y / modelSize.y,
         roomSize.z / modelSize.z
     );
-    console.log('Scale factor:', scaleFactor);
     object.scale.set(scaleFactor, scaleFactor, scaleFactor);
-    // Add the model to the scene
     scene.add(object);
   });
 
-  // Read the file as text
   reader.readAsText(file);
 });
 
