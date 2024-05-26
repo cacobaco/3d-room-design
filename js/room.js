@@ -72,7 +72,7 @@ document.getElementById("addModel").addEventListener("submit", function (event) 
           // calcula o tamanho do modelo e do ambiente para ajustar o tamanho do modelo
           const boundingBox = new THREE.Box3().setFromObject(object);
           const modelSize = boundingBox.getSize(new THREE.Vector3());
-          const roomSize = new THREE.Vector3(10, 10, 10); // Replace with the actual size of your room
+          const roomSize = new THREE.Vector3(10, 10, 10);
 
           const scaleFactor = Math.min(
               roomSize.x / modelSize.x,
