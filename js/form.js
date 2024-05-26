@@ -2,7 +2,6 @@ const primitiveAttributeSelect = document.getElementById("primitiveAttribute");
 const primitiveColorSelect = document.getElementById("primitiveColor");
 const primitiveTextureSelect = document.getElementById("primitiveTexture");
 
-
 const lightSelect = document.getElementById("lightType");
 const addDirectionalLightForm = document.getElementById("addDirectionalLightForm");
 const resetDirectionalLightForm = document.getElementById("resetDirectionalLightForm");
