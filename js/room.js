@@ -94,10 +94,18 @@ document
 
 // Event listeners para teclas
 window.addEventListener("keydown", (event) => {
+  if (!controls.enabled) {
+    return;
+  }
+
   keysPressed[event.key.toLowerCase()] = true;
 });
 
 window.addEventListener("keyup", (event) => {
+  if (!controls.enabled) {
+    return;
+  }
+
   keysPressed[event.key.toLowerCase()] = false;
 
   if (event.key === "CapsLock" && selectedPrimitive) {
