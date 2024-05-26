@@ -40,7 +40,6 @@ export function removeManipulableObjectOption(objectId) {
   manipulableObjectsSelect.remove(objectId);
 }
 
-
 lightSelect.addEventListener("change", function () {
   if (this.value === "directional") {
     addAmbientLightForm.style.display = "none";
