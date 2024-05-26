@@ -124,9 +124,9 @@ document.getElementById("gl-canvas").addEventListener("click", () => {
  * @property {number} height - The height of the primitive.
  * @property {number} width - The width of the primitive.
  * @property {number} depth - The depth of the primitive.
- * @property {number} x - The x-coordinate of the primitive.
- * @property {number} y - The y-coordinate of the primitive.
- * @property {number} z - The z-coordinate of the primitive.
+ * @property {number} initialX - The x-coordinate of the primitive.
+ * @property {number} initialY - The y-coordinate of the primitive.
+ * @property {number} initialZ - The z-coordinate of the primitive.
  * @property {number} rotationX - The x-axis rotation of the primitive.
  * @property {number} rotationY - The y-axis rotation of the primitive.
  * @property {number} rotationZ - The z-axis rotation of the primitive.
@@ -179,9 +179,9 @@ function getFormPrimitiveData() {
   const depth = document.getElementById("primitiveDepth").value;
 
   // Get the primitive position
-  const x = document.getElementById("primitiveX").value;
-  const y = document.getElementById("primitiveY").value;
-  const z = document.getElementById("primitiveZ").value;
+  const initialX = document.getElementById("primitiveX").value;
+  const initialY = document.getElementById("primitiveY").value;
+  const initialZ = document.getElementById("primitiveZ").value;
 
   // Get the primitive rotation
   const rotationX = document.getElementById("primitiveRotationX").value;
@@ -201,9 +201,9 @@ function getFormPrimitiveData() {
     height,
     width,
     depth,
-    x,
-    y,
-    z,
+    initialX,
+    initialY,
+    initialZ,
     rotationX,
     rotationY,
     rotationZ,
@@ -221,9 +221,9 @@ function getFormPrimitiveData() {
  * @param {string} primitive.height - The height of the primitive.
  * @param {string} primitive.width - The width of the primitive.
  * @param {string} primitive.depth - The depth of the primitive.
- * @param {string} primitive.x - The x-coordinate of the primitive.
- * @param {string} primitive.y - The y-coordinate of the primitive.
- * @param {string} primitive.z - The z-coordinate of the primitive.
+ * @param {string} primitive.initialX - The initial x-coordinate of the primitive.
+ * @param {string} primitive.initialY - The initial y-coordinate of the primitive.
+ * @param {string} primitive.initialZ - The initial z-coordinate of the primitive.
  * @param {string} primitive.rotationX - The x-axis rotation of the primitive.
  * @param {string} primitive.rotationY - The y-axis rotation of the primitive.
  * @param {string} primitive.rotationZ - The z-axis rotation of the primitive.
@@ -243,9 +243,9 @@ function parsePrimitive(
     height,
     width,
     depth,
-    x,
-    y,
-    z,
+    initialX,
+    initialY,
+    initialZ,
     rotationX,
     rotationY,
     rotationZ,
@@ -270,9 +270,9 @@ function parsePrimitive(
     height: parseFloat(height) || 1,
     width: parseFloat(width) || 1,
     depth: parseFloat(depth) || 1,
-    x: parseFloat(x) || 0,
-    y: parseFloat(y) || height / 2,
-    z: parseFloat(z) || 0,
+    initialX: parseFloat(initialX) || 0,
+    initialY: parseFloat(initialY) || height / 2,
+    initialZ: parseFloat(initialZ) || 0,
     rotationX: parseFloat(rotationX) || 0,
     rotationY: parseFloat(rotationY) || 0,
     rotationZ: parseFloat(rotationZ) || 0,
@@ -296,7 +296,7 @@ function createPrimitive(primitive) {
   const material = getPrimitiveMaterial(primitive);
   const mesh = new THREE.Mesh(geometry, material);
 
-  mesh.position.set(primitive.x, primitive.y, primitive.z);
+  mesh.position.set(primitive.initialX, primitive.initialY, primitive.initialZ);
 
   mesh.rotation.set(
     THREE.MathUtils.degToRad(primitive.rotationX),

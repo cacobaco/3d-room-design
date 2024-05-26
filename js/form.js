@@ -1,3 +1,5 @@
+import { round } from "./utils.js";
+
 const primitiveAttributeSelect = document.getElementById("primitiveAttribute");
 const primitiveColorSelect = document.getElementById("primitiveColor");
 const primitiveTextureSelect = document.getElementById("primitiveTexture");
@@ -65,9 +67,9 @@ export function updateSelectedManipulableObject(primitive = undefined) {
   heightElement.value = primitive?.height ?? "";
   widthElement.value = primitive?.width ?? "";
   depthElement.value = primitive?.depth ?? "";
-  xElement.value = primitive?.x ?? "";
-  yElement.value = primitive?.y ?? "";
-  zElement.value = primitive?.z ?? "";
+  xElement.value = primitive?.mesh ? round(primitive.mesh.position.x, 2) : "";
+  yElement.value = primitive?.mesh ? round(primitive.mesh.position.y, 2) : "";
+  zElement.value = primitive?.mesh ? round(primitive.mesh.position.z, 2) : "";
   rotationXElement.value = primitive?.rotationX ?? "";
   rotationYElement.value = primitive?.rotationY ?? "";
   rotationZElement.value = primitive?.rotationZ ?? "";
