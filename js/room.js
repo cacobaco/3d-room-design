@@ -3,9 +3,6 @@ import { PointerLockControls } from "three/addons/controls/PointerLockControls.j
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 
 
-const loader = new OBJLoader();
-
-
 // Criar cena, câmera e renderizador
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, 800 / 800, 0.1, 1000);
@@ -65,7 +62,7 @@ const keysPressed = {};
  * @property {THREE.Vector3} modelSize - The original size of the 3D model.
  * @property {THREE.Vector3} roomSize - The size of the "room" in the 3D scene.
  * @property {number} scaleFactor - The factor used to scale the model to fit in the room.
- *
+ * @property {OBJLoader} loader - The OBJLoader instance used to load the 3D model.
  */
 
 // Recebe os inputs do formulário para o modelo
@@ -74,6 +71,7 @@ const fileInput = document.getElementById('file');
 
 // Event listener para adicionar o modelo
 form.addEventListener('submit', function(event) {
+  const loader = new OBJLoader();
   // Impede a pagina de atualizar
   event.preventDefault();
 
