@@ -39,15 +39,6 @@ floor.rotation.x = -Math.PI / 2;
 floor.position.set(0, 0, 0);
 scene.add(floor);
 
-// Adicionar bounding box para colisão
-const box = new THREE.Box3().setFromObject(wall1);
-wall1.geometry.computeBoundingBox();
-wall1.boundingBox = new THREE.Box3().setFromObject(wall1);
-wall2.geometry.computeBoundingBox();
-wall2.boundingBox = new THREE.Box3().setFromObject(wall2);
-floor.geometry.computeBoundingBox();
-floor.boundingBox = new THREE.Box3().setFromObject(floor);
-
 // Configurar a posição inicial da câmera
 camera.position.set(5, 5, 15);
 camera.lookAt(0, 5, 0);
@@ -308,6 +299,13 @@ function createPrimitive(primitive) {
 
   primitive.mesh = mesh;
   primitives[primitive.id] = primitive;
+
+  if (!isPrimitiveInsideRoom(primitive)) {
+    delete primitives[primitive.id];
+    showErrorModal("Erro", "A primitiva não pode ser criada fora da sala.");
+    return;
+  }
+
   scene.add(mesh);
   addManipulableObjectOption(primitive.id);
 }
@@ -349,6 +347,24 @@ function getPrimitiveMaterial({ attribute, attributeValue }) {
   }
 
   return new THREE.MeshPhongMaterial({ color: attributeValue });
+}
+
+function isPrimitiveInsideRoom(primitive) {
+  const box = new THREE.Box3().setFromObject(primitive.mesh);
+
+  if (box.min.x < -5 || box.max.x > 5) {
+    return false;
+  }
+
+  if (box.min.y < 0 || box.max.y > 10) {
+    return false;
+  }
+
+  if (box.min.z < -5 || box.max.z > 5) {
+    return false;
+  }
+
+  return true;
 }
 
 // ***************************
