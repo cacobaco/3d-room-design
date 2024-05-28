@@ -73,14 +73,33 @@ let moveSpeed = 0.1;
 const keysPressed = {};
 
 // Event listeners for keys
-window.addEventListener("keydown", (event) => {
+window.addEventListener("keydown", handleKeyDown);
+
+/**
+ * Handles the keydown event.
+ * Updates the keys pressed object with the pressed key.
+ * If the controls are not enabled, the function returns early.
+ *
+ * @param {KeyboardEvent} event - The keydown event object.
+ */
+function handleKeyDown(event) {
   if (!controls.enabled) {
     return;
   }
   keysPressed[event.key.toLowerCase()] = true;
-});
+}
 
-window.addEventListener("keyup", (event) => {
+window.addEventListener("keyup", handleKeyUp);
+
+/**
+ * Handles the key up event.
+ * Updates the keys pressed object with the released key.
+ * If the controls are not enabled, the function returns early.
+ * If the CapsLock key is released and an object is selected, collisions are toggled.
+ *
+ * @param {KeyboardEvent} event - The key up event object.
+ */
+function handleKeyUp(event) {
   keysPressed[event.key.toLowerCase()] = false;
   if (!controls.enabled) {
     return;
@@ -88,7 +107,7 @@ window.addEventListener("keyup", (event) => {
   if (event.key === "CapsLock" && selectedObject) {
     collisionsEnabled = !collisionsEnabled;
   }
-});
+}
 
 /**
  * Updates the camera position based on the keys pressed.
@@ -136,17 +155,30 @@ updateCamera();
 const controls = new PointerLockControls(camera, document.body);
 
 // Event listeners for mouse movement
-document.addEventListener("pointerlockchange", () => {
+document.addEventListener("pointerlockchange", handlePointerLockChange);
+
+/**
+ * Handles the change event for pointer lock.
+ */
+function handlePointerLockChange() {
   if (document.pointerLockElement === document.body) {
     controls.enabled = true;
   } else {
     controls.enabled = false;
   }
-});
+}
 
-document.getElementById("gl-canvas").addEventListener("click", () => {
+document
+  .getElementById("gl-canvas")
+  .addEventListener("click", handleCanvasClick);
+
+/**
+ * Handles the click event on the canvas element.
+ * Requests pointer lock for the document body.
+ */
+function handleCanvasClick() {
   document.body.requestPointerLock();
-});
+}
 
 // ***********************
 // * PRIMITIVES CREATION *
@@ -173,7 +205,20 @@ document.getElementById("gl-canvas").addEventListener("click", () => {
 const maxPrimitives = 10;
 const primitives = {};
 
-document.getElementById("primitiveForm").addEventListener("submit", (event) => {
+document
+  .getElementById("primitiveForm")
+  .addEventListener("submit", handlePrimitiveFormSubmit);
+
+/**
+ * Handles the form submission for creating or updating a primitive.
+ * Prevents the default form submission behavior.
+ * Checks if the maximum number of primitives has been reached.
+ * Parses the form data and creates a primitive object.
+ * If an error occurs, an error modal is shown.
+ *
+ * @param {Event} event The form submission event.
+ */
+function handlePrimitiveFormSubmit(event) {
   event.preventDefault();
 
   const count = Object.keys(primitives).length;
@@ -197,7 +242,7 @@ document.getElementById("primitiveForm").addEventListener("submit", (event) => {
   } catch (error) {
     showErrorModal("Erro", error.message);
   }
-});
+}
 
 /**
  * Retrieves the form data for a primitive object.
@@ -466,31 +511,42 @@ const models = {};
 
 document
   .getElementById("modelForm")
-  .addEventListener("submit", function (event) {
-    event.preventDefault();
+  .addEventListener("submit", handleModelFormSubmit);
 
-    const count = Object.keys(models).length;
+/**
+ * Handles the form submission for adding or updating a model.
+ * Prevents the default form submission behavior.
+ * Checks if the maximum number of models has been reached.
+ * Parses the form data and creates a model object.
+ * If an error occurs, an error modal is shown.
+ *
+ * @param {Event} event - The form submission event.
+ */
+function handleModelFormSubmit(event) {
+  event.preventDefault();
 
-    if (count >= maxModels) {
-      showErrorModal(
-        "Erro",
-        `O número máximo de modelos foi atingido (${count}/${maxModels}).`
-      );
-      return;
-    }
+  const count = Object.keys(models).length;
 
-    const isUpdate =
-      document.getElementById("createModelButton").textContent ===
-      "Atualizar Modelo";
+  if (count >= maxModels) {
+    showErrorModal(
+      "Erro",
+      `O número máximo de modelos foi atingido (${count}/${maxModels}).`
+    );
+    return;
+  }
 
-    try {
-      const modelData = getFormModelData();
-      const model = parseModel(modelData, !isUpdate);
-      createModel(model);
-    } catch (error) {
-      showErrorModal("Erro", error.message);
-    }
-  });
+  const isUpdate =
+    document.getElementById("createModelButton").textContent ===
+    "Atualizar Modelo";
+
+  try {
+    const modelData = getFormModelData();
+    const model = parseModel(modelData, !isUpdate);
+    createModel(model);
+  } catch (error) {
+    showErrorModal("Erro", error.message);
+  }
+}
 
 /**
  * Retrieves the form data for a model object.
@@ -1013,20 +1069,35 @@ function createSpotLightCone(spotLight, color) {
 // **********************
 document
   .getElementById("addDirectionalLightForm")
-  .addEventListener("submit", (event) => {
-    event.preventDefault();
-    scene.remove(directionalLight);
-    const light = getFormLight();
-    createLight(light);
-  });
+  .addEventListener("submit", handleDirectionalLightFormSubmit);
+
+/**
+ * Handles the form submission for the directional light.
+ * Removes the existing directional light from the scene and creates a new one based on the form input.
+ *
+ * @param {Event} event - The form submission event.
+ */
+function handleDirectionalLightFormSubmit(event) {
+  event.preventDefault();
+  scene.remove(directionalLight);
+  const light = getFormLight();
+  createLight(light);
+}
 
 document
   .getElementById("resetDirectionalLightForm")
-  .addEventListener("submit", (event) => {
-    event.preventDefault();
-    scene.remove(directionalLight);
-    scene.remove(arrowHelper);
-  });
+  .addEventListener("submit", handleResetDirectionalLightFormSubmit);
+
+/**
+ * Handles the form submit event for resetting the directional light.
+ *
+ * @param {Event} event - The form submit event.
+ */
+function handleResetDirectionalLightFormSubmit(event) {
+  event.preventDefault();
+  scene.remove(directionalLight);
+  scene.remove(arrowHelper);
+}
 
 /**
  * Retrieves the form values for light position, direction, and color.
@@ -1095,19 +1166,34 @@ function createLight({ posX, posY, posZ, dirX, dirY, dirZ, R, G, B }) {
 // ******************
 document
   .getElementById("addAmbientLightForm")
-  .addEventListener("submit", (event) => {
-    event.preventDefault();
-    scene.remove(ambientLight);
-    const light = getFormAmbientLight();
-    createAmbientLight(light);
-  });
+  .addEventListener("submit", handleAmbientLightFormSubmit);
+
+/**
+ * Handles the form submission for ambient light settings.
+ * Removes the existing ambient light from the scene and creates a new one based on the form input.
+ *
+ * @param {Event} event - The form submission event.
+ */
+function handleAmbientLightFormSubmit(event) {
+  event.preventDefault();
+  scene.remove(ambientLight);
+  const light = getFormAmbientLight();
+  createAmbientLight(light);
+}
 
 document
   .getElementById("resetAmbientLightForm")
-  .addEventListener("submit", (event) => {
-    event.preventDefault();
-    scene.remove(ambientLight);
-  });
+  .addEventListener("submit", handleResetAmbientLightFormSubmit);
+
+/**
+ * Handles the form submission for resetting the ambient light.
+ *
+ * @param {Event} event - The form submission event.
+ */
+function handleResetAmbientLightFormSubmit(event) {
+  event.preventDefault();
+  scene.remove(ambientLight);
+}
 
 /**
  * Retrieves the values of the ambient light form inputs.
@@ -1149,20 +1235,36 @@ function createAmbientLight({ intensity, R, G, B }) {
 // ****************
 document
   .getElementById("addPointLightForm")
-  .addEventListener("submit", (event) => {
-    event.preventDefault();
-    scene.remove(pointLight);
-    const light = getFormPointLight();
-    createPointLight(light);
-  });
+  .addEventListener("submit", handlePointLightFormSubmit);
+
+/**
+ * Handles the form submission for the point light.
+ * Removes the existing point light from the scene and creates a new point light based on the form input.
+ *
+ * @param {Event} event - The form submit event.
+ */
+function handlePointLightFormSubmit(event) {
+  event.preventDefault();
+  scene.remove(pointLight);
+  const light = getFormPointLight();
+  createPointLight(light);
+}
 
 document
   .getElementById("resetPointLightForm")
-  .addEventListener("submit", (event) => {
-    event.preventDefault();
-    scene.remove(pointLight);
-    scene.remove(sphere);
-  });
+  .addEventListener("submit", handleResetPointLightFormSubmit);
+
+/**
+ * Handles the form submission for resetting the point light.
+ * Removes the point light and sphere from the scene.
+ *
+ * @param {Event} event - The form submit event.
+ */
+function handleResetPointLightFormSubmit(event) {
+  event.preventDefault();
+  scene.remove(pointLight);
+  scene.remove(sphere);
+}
 
 /**
  * Retrieves the values from the form inputs and returns an object containing the point light properties.
@@ -1225,20 +1327,36 @@ function createPointLight({ intensity, decay, posX, posY, posZ, R, G, B }) {
 // ***************
 document
   .getElementById("addSpotLightForm")
-  .addEventListener("submit", (event) => {
-    event.preventDefault();
-    scene.remove(spotLight);
-    const light = getFormSpotLight();
-    createSpotLight(light);
-  });
+  .addEventListener("submit", handleSpotLightFormSubmit);
+
+/**
+ * Handles the form submission for the spot light.
+ * Removes the existing spot light from the scene and creates a new spot light based on the form input.
+ *
+ * @param {Event} event - The form submission event.
+ */
+function handleSpotLightFormSubmit(event) {
+  event.preventDefault();
+  scene.remove(spotLight);
+  const light = getFormSpotLight();
+  createSpotLight(light);
+}
 
 document
   .getElementById("resetSpotLightForm")
-  .addEventListener("submit", (event) => {
-    event.preventDefault();
-    scene.remove(spotLight);
-    scene.remove(lightCone);
-  });
+  .addEventListener("submit", handleResetSpotLightFormSubmit);
+
+/**
+ * Handles the form submit event for resetting the spot light.
+ * Removes the spot light and light cone from the scene.
+ *
+ * @param {Event} event - The form submit event.
+ */
+function handleResetSpotLightFormSubmit(event) {
+  event.preventDefault();
+  scene.remove(spotLight);
+  scene.remove(lightCone);
+}
 
 /**
  * Retrieves the values from the form inputs related to the spot light and returns them as an object.
@@ -1335,6 +1453,11 @@ function createSpotLight({
 // **************************
 // * MAIN PROGRAM (KIND OF) *
 // **************************
+
+/**
+ * Animates the scene by rendering it with the provided renderer and camera.
+ * This function is called recursively using requestAnimationFrame to create a smooth animation loop.
+ */
 function animate() {
   requestAnimationFrame(animate);
   renderer.render(scene, camera);
