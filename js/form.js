@@ -1,6 +1,6 @@
 import {
-  onDeleteObjectButtonClick,
-  onManipulateObjectButtonClick,
+  handleDeleteObjectButtonClick,
+  handleManipulateObjectButtonClick,
 } from "./room.js";
 import { round } from "./utils.js";
 
@@ -9,12 +9,24 @@ const primitiveColorSelect = document.getElementById("primitiveColor");
 const primitiveTextureSelect = document.getElementById("primitiveTexture");
 
 primitiveAttributeSelect.addEventListener("change", function () {
-  if (this.value === "texture") {
-    primitiveColorSelect.style.display = "none";
-    primitiveTextureSelect.style.display = "block";
-  } else {
+  if (this.value === "color") {
     primitiveTextureSelect.style.display = "none";
+    primitiveTextureSelect.removeAttribute("required");
+
     primitiveColorSelect.style.display = "block";
+    primitiveColorSelect.setAttribute("required", true);
+  } else if (this.value === "texture") {
+    primitiveColorSelect.style.display = "none";
+    primitiveColorSelect.removeAttribute("required");
+
+    primitiveTextureSelect.style.display = "block";
+    primitiveTextureSelect.setAttribute("required", true);
+  } else {
+    primitiveColorSelect.style.display = "none";
+    primitiveColorSelect.removeAttribute("required");
+
+    primitiveTextureSelect.style.display = "none";
+    primitiveTextureSelect.removeAttribute("required");
   }
 });
 
@@ -32,7 +44,9 @@ export function addManipulableObjectOption(objectId) {
 }
 
 export function removeManipulableObjectOption(objectId) {
-  manipulableObjectsSelect.remove(objectId);
+  manipulableObjectsSelect.removeChild(
+    manipulableObjectsSelect.querySelector(`option[value="${objectId}"]`)
+  );
 }
 
 const idElement = document.getElementById("primitiveId");
@@ -49,54 +63,70 @@ const rotationZElement = document.getElementById("primitiveRotationZ");
 const attributeElement = document.getElementById("primitiveAttribute");
 const textureElement = document.getElementById("primitiveTexture");
 const colorElement = document.getElementById("primitiveColor");
-const createButton = document.getElementById("createPrimitiveButton");
+const createPrimitiveButton = document.getElementById("createPrimitiveButton");
+const createModelButton = document.getElementById("createModelButton");
 
 /**
- * Updates the selected manipulable object with the provided primitive data.
- * If no primitive is provided, the form is reset to create a new object.
+ * Updates the selected manipulable object with the provided object data.
+ * If no object is provided, the form is reset to create a new object.
  *
- * @param {import("./room").Primitive | undefined} primitive - The primitive object containing the data to update the selected object.
+ * @param {import("./room").Primitive | import("./room").Model | undefined} object - The object containing the data to update the selected object.
  */
-export function updateSelectedManipulableObject(primitive = undefined) {
-  if (primitive) {
-    createButton.textContent = "Atualizar Primitiva";
+export function updateSelectedManipulableObject(object = undefined) {
+  if (object) {
+    createPrimitiveButton.textContent = "Atualizar Primitiva";
+    createModelButton.textContent = "Atualizar Modelo";
     idElement.disabled = true;
   } else {
-    createButton.textContent = "Adicionar Primitiva";
+    manipulableObjectsSelect.value = "";
+    createPrimitiveButton.textContent = "Adicionar Primitiva";
+    createModelButton.textContent = "Adicionar Modelo";
     idElement.disabled = false;
   }
 
-  idElement.value = primitive?.id ?? "";
-  typeElement.value = primitive?.type ?? "";
-  heightElement.value = primitive?.height ?? "";
-  widthElement.value = primitive?.width ?? "";
-  depthElement.value = primitive?.depth ?? "";
-  xElement.value = primitive?.mesh ? round(primitive.mesh.position.x, 2) : "";
-  yElement.value = primitive?.mesh ? round(primitive.mesh.position.y, 2) : "";
-  zElement.value = primitive?.mesh ? round(primitive.mesh.position.z, 2) : "";
-  rotationXElement.value = primitive?.rotationX ?? "";
-  rotationYElement.value = primitive?.rotationY ?? "";
-  rotationZElement.value = primitive?.rotationZ ?? "";
-  attributeElement.value = primitive?.attribute ?? "";
+  idElement.value = object?.id ?? "";
+  typeElement.value = object?.type ?? "";
+  heightElement.value = object?.height ?? "";
+  widthElement.value = object?.width ?? "";
+  depthElement.value = object?.depth ?? "";
 
-  if (primitive?.attribute === "texture") {
+  if (object?.mesh) {
+    xElement.value = round(object.mesh.position.x, 2);
+    yElement.value = round(object.mesh.position.y, 2);
+    zElement.value = round(object.mesh.position.z, 2);
+  } else if (object?.object) {
+    xElement.value = round(object.object.position.x, 2);
+    yElement.value = round(object.object.position.y, 2);
+    zElement.value = round(object.object.position.z, 2);
+  } else {
+    xElement.value = "";
+    yElement.value = "";
+    zElement.value = "";
+  }
+
+  rotationXElement.value = object?.rotationX ?? "";
+  rotationYElement.value = object?.rotationY ?? "";
+  rotationZElement.value = object?.rotationZ ?? "";
+  attributeElement.value = object?.attribute ?? "";
+
+  if (object?.attribute === "texture") {
     textureElement.style.display = "block";
     colorElement.style.display = "none";
-    textureElement.value = primitive?.attributeValue ?? "";
+    textureElement.value = object?.attributeValue ?? "";
   } else {
     colorElement.style.display = "block";
     textureElement.style.display = "none";
-    colorElement.value = primitive?.attributeValue ?? "";
-    colorElement.style.color = primitive?.attributeValue ?? "";
+    colorElement.value = object?.attributeValue ?? "";
+    colorElement.style.color = object?.attributeValue ?? "";
   }
 }
 
 document
   .getElementById("manipulateObjectButton")
-  .addEventListener("click", onManipulateObjectButtonClick);
+  .addEventListener("click", handleManipulateObjectButtonClick);
 document
   .getElementById("deleteObjectButton")
-  .addEventListener("click", onDeleteObjectButtonClick);
+  .addEventListener("click", handleDeleteObjectButtonClick);
 
 const lightSelect = document.getElementById("lightType");
 const addDirectionalLightForm = document.getElementById(
