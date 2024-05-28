@@ -56,98 +56,113 @@ scene.add(floor);
 camera.position.set(5, 5, 15);
 camera.lookAt(0, 5, 0);
 
-
 // Variáveis para controle de movimento
 let moveSpeed = 0.1;
 const keysPressed = {};
-
 
 let storedObjects = {};
 let storedObject = {};
 let collisionObjects = [];
 
-document.getElementById("addModel").addEventListener("submit", function (event) {
-  event.preventDefault();
+document
+  .getElementById("addModel")
+  .addEventListener("submit", function (event) {
+    event.preventDefault();
 
-  const loader = new OBJLoader();
+    const loader = new OBJLoader();
 
-  const fileInput = document.getElementById("file");
-  const file = fileInput.files[0];
-  const reader = new FileReader();
+    const fileInput = document.getElementById("file");
+    const file = fileInput.files[0];
+    const reader = new FileReader();
 
-  // Extract the filename without extension
-  const filename = file.name.split('.').slice(0, -1).join('.');
+    // Extract the filename without extension
+    const filename = file.name.split(".").slice(0, -1).join(".");
 
-  // Load the texture based on the filename
-  const texture = new THREE.TextureLoader().load(`../modelos/${filename}_texture.png`);
+    // Load the texture based on the filename
+    const texture = new THREE.TextureLoader().load(
+      `../modelos/${filename}_texture.png`
+    );
 
-  reader.addEventListener("load", function (event) {
-    const contents = event.target.result;
-    const object = loader.parse(contents);
+    reader.addEventListener("load", function (event) {
+      const contents = event.target.result;
+      const object = loader.parse(contents);
 
-    object.traverse(function (child) {
-      if (child instanceof THREE.Mesh) {
-        child.castShadow = true;
-        child.receiveShadow = true;
+      object.traverse(function (child) {
+        if (child instanceof THREE.Mesh) {
+          child.castShadow = true;
+          child.receiveShadow = true;
 
-        // Apply the texture to the material of the mesh
-        child.material.map = texture;
-        child.material.needsUpdate = true;
+          // Apply the texture to the material of the mesh
+          child.material.map = texture;
+          child.material.needsUpdate = true;
+        }
+      });
+
+      // Get the initial position and rotation from the user's input
+      const initialX =
+        parseFloat(document.getElementById("primitiveX").value) || 0;
+      const initialY =
+        parseFloat(document.getElementById("primitiveY").value) || 0;
+      const initialZ =
+        parseFloat(document.getElementById("primitiveZ").value) || 0;
+      const rotationX =
+        parseFloat(document.getElementById("primitiveRotationX").value) || 0;
+      const rotationY =
+        parseFloat(document.getElementById("primitiveRotationY").value) || 0;
+      const rotationZ =
+        parseFloat(document.getElementById("primitiveRotationZ").value) || 0;
+      let height =
+        parseFloat(document.getElementById("primitiveHeight").value) || 1;
+      let width =
+        parseFloat(document.getElementById("primitiveWidth").value) || 1;
+      let depth =
+        parseFloat(document.getElementById("primitiveDepth").value) || 1;
+
+      height = height / 10;
+      width = width / 10;
+      depth = depth / 10;
+
+      // Set the initial position and rotation of the model
+      object.position.set(initialX, initialY, initialZ);
+      object.rotation.set(rotationX, rotationY, rotationZ);
+
+      // Calculate the size of the model and the environment to adjust the size of the model
+      const boundingBox = new THREE.Box3().setFromObject(object);
+      const modelSize = boundingBox.getSize(new THREE.Vector3());
+      const roomSize = new THREE.Vector3(10, 10, 10);
+
+      // Assign a unique ID to the model
+      const userInput = document.getElementById("primitiveId").value;
+      const modelId = userInput;
+
+      // Check if an object with the same name already exists
+      if (scene.getObjectByName(modelId)) {
+        throw new Error(`Já existe um modelo com o id "${modelId}".`);
+        return;
       }
-    });
 
-    // Get the initial position and rotation from the user's input
-    const initialX = parseFloat(document.getElementById("primitiveX").value) || 0;
-    const initialY = parseFloat(document.getElementById("primitiveY").value) || 0;
-    const initialZ = parseFloat(document.getElementById("primitiveZ").value) || 0;
-    const rotationX = parseFloat(document.getElementById("primitiveRotationX").value) || 0;
-    const rotationY = parseFloat(document.getElementById("primitiveRotationY").value) || 0;
-    const rotationZ = parseFloat(document.getElementById("primitiveRotationZ").value) || 0;
-    let height = parseFloat(document.getElementById("primitiveHeight").value) || 1;
-    let width = parseFloat(document.getElementById("primitiveWidth").value) || 1;
-    let depth = parseFloat(document.getElementById("primitiveDepth").value) || 1;
+      if (primitives[modelId]) {
+        throw new Error(`Já existe uma primitiva com o id "${modelId}".`);
+        return;
+      }
 
-    height=height/10;
-    width=width/10;
-    depth=depth/10;
+      object.name = modelId;
+      addManipulableObjectOption(object.name);
 
-    // Set the initial position and rotation of the model
-    object.position.set(initialX, initialY, initialZ);
-    object.rotation.set(rotationX, rotationY, rotationZ);
-
-
-    // Calculate the size of the model and the environment to adjust the size of the model
-    const boundingBox = new THREE.Box3().setFromObject(object);
-    const modelSize = boundingBox.getSize(new THREE.Vector3());
-    const roomSize = new THREE.Vector3(10, 10, 10);
-
-    // Assign a unique ID to the model
-    const userInput = document.getElementById("primitiveId").value;
-    const modelId = userInput;
-
-    // Check if an object with the same name already exists
-    if (scene.getObjectByName(modelId)) {
-      throw new Error(`Já existe um modelo com o id "${modelId}".`);
-      return;
-    }
-
-    if (primitives[modelId]) {
-      throw new Error(`Já existe uma primitiva com o id "${modelId}".`);
-      return;
-    }
-
-    object.name = modelId;
-    addManipulableObjectOption(object.name);
-
-    const scaleFactor = Math.min(
+      const scaleFactor = Math.min(
         roomSize.x / modelSize.x,
         roomSize.y / modelSize.y,
         roomSize.z / modelSize.z
-    );
-    object.scale.set(scaleFactor * height, scaleFactor * width, scaleFactor * depth);
+      );
 
-    // Store the object for later manipulation
-    storedObject = object;
+      object.scale.set(
+        scaleFactor * height,
+        scaleFactor * width,
+        scaleFactor * depth
+      );
+
+      scene.add(object);
+    });
 
     storedObjects[modelId] = object;
 
@@ -155,9 +170,6 @@ document.getElementById("addModel").addEventListener("submit", function (event) 
 
     scene.add(object);
   });
-
-  reader.readAsText(file);
-});
 
 // Event listeners para teclas
 window.addEventListener("keydown", (event) => {
@@ -178,7 +190,6 @@ window.addEventListener("keyup", (event) => {
   if (event.key === "CapsLock" && selectedPrimitive) {
     primitiveCollisionsEnabled = !primitiveCollisionsEnabled;
   }
-
 });
 
 // Controle de movimento WASD
@@ -228,7 +239,6 @@ document.getElementById("gl-canvas").addEventListener("click", () => {
   document.body.requestPointerLock();
 });
 
-
 // ***********************
 // * PRIMITIVES CREATION *
 // ***********************
@@ -261,15 +271,15 @@ document.getElementById("primitiveForm").addEventListener("submit", (event) => {
 
   if (count >= maxPrimitives) {
     showErrorModal(
-        "Erro",
-        `O número máximo de primitivas foi atingido (${count}/${maxPrimitives}).`
+      "Erro",
+      `O número máximo de primitivas foi atingido (${count}/${maxPrimitives}).`
     );
     return;
   }
 
   const isUpdate =
-      document.getElementById("createPrimitiveButton").textContent ===
-      "Atualizar Primitiva";
+    document.getElementById("createPrimitiveButton").textContent ===
+    "Atualizar Primitiva";
 
   try {
     const primitiveData = getFormPrimitiveData();
@@ -307,9 +317,9 @@ function getFormPrimitiveData() {
   // Get the primitive attribute and value
   const attribute = document.getElementById("primitiveAttribute").value;
   const attributeValue =
-      attribute === "texture"
-          ? document.getElementById("primitiveTexture").value
-          : document.getElementById("primitiveColor").value;
+    attribute === "texture"
+      ? document.getElementById("primitiveTexture").value
+      : document.getElementById("primitiveColor").value;
 
   return {
     id,
@@ -353,22 +363,22 @@ function getFormPrimitiveData() {
  * @throws If a primitive with the same id already exists.
  */
 function parsePrimitive(
-    {
-      id,
-      type,
-      height,
-      width,
-      depth,
-      initialX,
-      initialY,
-      initialZ,
-      rotationX,
-      rotationY,
-      rotationZ,
-      attribute,
-      attributeValue,
-    },
-    checkExistingId = true
+  {
+    id,
+    type,
+    height,
+    width,
+    depth,
+    initialX,
+    initialY,
+    initialZ,
+    rotationX,
+    rotationY,
+    rotationZ,
+    attribute,
+    attributeValue,
+  },
+  checkExistingId = true
 ) {
   const parsedId = id.trim();
 
@@ -422,9 +432,9 @@ function createPrimitive(primitive) {
   mesh.position.set(primitive.initialX, primitive.initialY, primitive.initialZ);
 
   mesh.rotation.set(
-      THREE.MathUtils.degToRad(primitive.rotationX),
-      THREE.MathUtils.degToRad(primitive.rotationY),
-      THREE.MathUtils.degToRad(primitive.rotationZ)
+    THREE.MathUtils.degToRad(primitive.rotationX),
+    THREE.MathUtils.degToRad(primitive.rotationY),
+    THREE.MathUtils.degToRad(primitive.rotationZ)
   );
 
   primitive.mesh = mesh;
@@ -483,7 +493,7 @@ function getPrimitiveGeometry({ type, height, width, depth }) {
 function getPrimitiveMaterial({ attribute, attributeValue }) {
   if (attribute === "texture") {
     const texture = new THREE.TextureLoader().load(
-        `../textures/${attributeValue}`
+      `../textures/${attributeValue}`
     );
     return new THREE.MeshPhongMaterial({ map: texture });
   }
@@ -528,7 +538,6 @@ export function onManipulateObjectButtonClick() {
     return;
   }
   selectObject(id);
-
 }
 
 export function onDeleteObjectButtonClick() {
@@ -591,12 +600,11 @@ function updateSelectedObject() {
   if (newBox.min.z < -5 || newBox.max.z > 5) {
     translation.z = 0;
   }
-  console.log(primitiveCollisionsEnabled);
+
   if (primitiveCollisionsEnabled) {
     for (const id in primitives) {
       if (id === selectedPrimitive.id) {
         continue;
-
       }
 
       const primitive = primitives[id];
@@ -616,10 +624,7 @@ function updateSelectedObject() {
   requestAnimationFrame(updateSelectedObject);
 }
 
-
 function updateStoredObject() {
-
-
   if (!storedObject) {
     return;
   }
@@ -669,8 +674,7 @@ function updateStoredObject() {
   if (newBox.min.z < -5 || newBox.max.z > 5) {
     translation.z = 0;
   }
-  console.log(primitiveCollisionsEnabled);
-  // Check for collisions with other primitives
+
   if (primitiveCollisionsEnabled) {
     for (const id in primitives) {
       const primitive = primitives[id];
@@ -701,11 +705,9 @@ function updateStoredObject() {
   requestAnimationFrame(updateStoredObject);
 }
 
-
 function selectObject(id) {
-
   // Deselect the previously selected object, if any
-  if (selectedPrimitive || selectedObject ) {
+  if (selectedPrimitive || selectedObject) {
     deselectObject();
   }
   // Check if the id matches a primitive
@@ -717,12 +719,12 @@ function selectObject(id) {
   }
   // Check if the id matches the name of the storedObject
   else {
-      if (storedObjects[id]) {
-        selectedObject = storedObjects[id];
-        updateStoredObject();
-        updateSelectedManipulableObject(selectedObject);
-      }
+    if (storedObjects[id]) {
+      selectedObject = storedObjects[id];
+      updateStoredObject();
+      updateSelectedManipulableObject(selectedObject);
     }
+  }
 }
 
 function deselectObject() {
@@ -736,8 +738,8 @@ function deselectObject() {
 
 function addBorder(mesh) {
   const border = new THREE.LineSegments(
-      new THREE.EdgesGeometry(mesh.geometry),
-      new THREE.LineBasicMaterial({ color: "white" })
+    new THREE.EdgesGeometry(mesh.geometry),
+    new THREE.LineBasicMaterial({ color: "white" })
   );
   mesh.add(border);
 }
@@ -772,13 +774,13 @@ function createLightSphere(position, color) {
 function createArrowHelper(newDirectionalLight, color) {
   scene.remove(arrowHelper);
   const dirVector = new THREE.Vector3()
-      .subVectors(directionalTarget.position, newDirectionalLight.position)
-      .normalize();
+    .subVectors(directionalTarget.position, newDirectionalLight.position)
+    .normalize();
   arrowHelper = new THREE.ArrowHelper(
-      dirVector,
-      newDirectionalLight.position,
-      3,
-      color
+    dirVector,
+    newDirectionalLight.position,
+    3,
+    color
   );
   scene.add(arrowHelper);
 }
@@ -791,8 +793,8 @@ function createSpotLightCone(spotLight, color) {
   cone.position.copy(spotLight.position);
 
   const dirVector = new THREE.Vector3()
-      .subVectors(spotTarget.position, spotLight.position)
-      .normalize();
+    .subVectors(spotTarget.position, spotLight.position)
+    .normalize();
   cone.quaternion.setFromUnitVectors(new THREE.Vector3(0, -1, 0), dirVector);
 
   scene.add(cone);
@@ -803,21 +805,21 @@ function createSpotLightCone(spotLight, color) {
 // * DIRECTIONAL *
 // ***************
 document
-    .getElementById("addDirectionalLightForm")
-    .addEventListener("submit", (event) => {
-      event.preventDefault();
-      scene.remove(directionalLight);
-      const light = getFormLight();
-      createLight(light);
-    });
+  .getElementById("addDirectionalLightForm")
+  .addEventListener("submit", (event) => {
+    event.preventDefault();
+    scene.remove(directionalLight);
+    const light = getFormLight();
+    createLight(light);
+  });
 
 document
-    .getElementById("resetDirectionalLightForm")
-    .addEventListener("submit", (event) => {
-      event.preventDefault();
-      scene.remove(directionalLight);
-      scene.remove(arrowHelper);
-    });
+  .getElementById("resetDirectionalLightForm")
+  .addEventListener("submit", (event) => {
+    event.preventDefault();
+    scene.remove(directionalLight);
+    scene.remove(arrowHelper);
+  });
 
 function getFormLight() {
   const posX = document.getElementById("lightPosX").value;
@@ -880,20 +882,20 @@ function createLight({ posX, posY, posZ, dirX, dirY, dirZ, R, G, B }) {
 // * AMBIENTAL *
 // *************
 document
-    .getElementById("addAmbientLightForm")
-    .addEventListener("submit", (event) => {
-      event.preventDefault();
-      scene.remove(ambientLight);
-      const light = getFormAmbientLight();
-      createAmbientLight(light);
-    });
+  .getElementById("addAmbientLightForm")
+  .addEventListener("submit", (event) => {
+    event.preventDefault();
+    scene.remove(ambientLight);
+    const light = getFormAmbientLight();
+    createAmbientLight(light);
+  });
 
 document
-    .getElementById("resetAmbientLightForm")
-    .addEventListener("submit", (event) => {
-      event.preventDefault();
-      scene.remove(ambientLight);
-    });
+  .getElementById("resetAmbientLightForm")
+  .addEventListener("submit", (event) => {
+    event.preventDefault();
+    scene.remove(ambientLight);
+  });
 
 function getFormAmbientLight() {
   const intensity = document.getElementById("ambientLightIntensity").value;
@@ -920,21 +922,21 @@ function createAmbientLight({ intensity, R, G, B }) {
 // *** POINT ***
 // *************
 document
-    .getElementById("addPointLightForm")
-    .addEventListener("submit", (event) => {
-      event.preventDefault();
-      scene.remove(pointLight);
-      const light = getFormPointLight();
-      createPointLight(light);
-    });
+  .getElementById("addPointLightForm")
+  .addEventListener("submit", (event) => {
+    event.preventDefault();
+    scene.remove(pointLight);
+    const light = getFormPointLight();
+    createPointLight(light);
+  });
 
 document
-    .getElementById("resetPointLightForm")
-    .addEventListener("submit", (event) => {
-      event.preventDefault();
-      scene.remove(pointLight);
-      scene.remove(sphere);
-    });
+  .getElementById("resetPointLightForm")
+  .addEventListener("submit", (event) => {
+    event.preventDefault();
+    scene.remove(pointLight);
+    scene.remove(sphere);
+  });
 
 function getFormPointLight() {
   const intensity = document.getElementById("pointLightIntensity").value;
@@ -978,21 +980,21 @@ function createPointLight({ intensity, decay, posX, posY, posZ, R, G, B }) {
 // *** SPOT ****
 // *************
 document
-    .getElementById("addSpotLightForm")
-    .addEventListener("submit", (event) => {
-      event.preventDefault();
-      scene.remove(spotLight);
-      const light = getFormSpotLight();
-      createSpotLight(light);
-    });
+  .getElementById("addSpotLightForm")
+  .addEventListener("submit", (event) => {
+    event.preventDefault();
+    scene.remove(spotLight);
+    const light = getFormSpotLight();
+    createSpotLight(light);
+  });
 
 document
-    .getElementById("resetSpotLightForm")
-    .addEventListener("submit", (event) => {
-      event.preventDefault();
-      scene.remove(spotLight);
-      scene.remove(lightCone);
-    });
+  .getElementById("resetSpotLightForm")
+  .addEventListener("submit", (event) => {
+    event.preventDefault();
+    scene.remove(spotLight);
+    scene.remove(lightCone);
+  });
 
 function getFormSpotLight() {
   const intensity = document.getElementById("spotLightIntensity").value;
@@ -1027,20 +1029,20 @@ function getFormSpotLight() {
 }
 
 function createSpotLight({
-                           intensity,
-                           angle,
-                           penumbra,
-                           decay,
-                           dirX,
-                           dirY,
-                           dirZ,
-                           posX,
-                           posY,
-                           posZ,
-                           R,
-                           G,
-                           B,
-                         }) {
+  intensity,
+  angle,
+  penumbra,
+  decay,
+  dirX,
+  dirY,
+  dirZ,
+  posX,
+  posY,
+  posZ,
+  R,
+  G,
+  B,
+}) {
   scene.remove(spotTarget);
   const color = rgbToHex(R, G, B);
   const newSpotLight = new THREE.SpotLight(color);
