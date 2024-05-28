@@ -620,7 +620,11 @@ function createModel(model) {
 
     object.position.set(model.initialX, model.initialY, model.initialZ);
 
-    object.rotation.set(model.rotationX, model.rotationY, model.rotationZ);
+    object.rotation.set(
+      THREE.MathUtils.degToRad(model.rotationX),
+      THREE.MathUtils.degToRad(model.rotationY),
+      THREE.MathUtils.degToRad(model.rotationZ)
+    );
 
     const height = model.height / 10;
     const width = model.width / 10;
