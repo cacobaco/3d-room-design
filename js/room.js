@@ -1391,6 +1391,11 @@ function createSpotLight({
 // **************************
 // * MAIN PROGRAM (KIND OF) *
 // **************************
+
+/**
+ * Animates the scene by rendering it with the provided renderer and camera.
+ * This function is called recursively using requestAnimationFrame to create a smooth animation loop.
+ */
 function animate() {
   requestAnimationFrame(animate);
   renderer.render(scene, camera);
