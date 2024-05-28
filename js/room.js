@@ -6,7 +6,14 @@ import {
   removeManipulableObjectOption,
   updateSelectedManipulableObject,
 } from "./form.js";
-import { rgbToHex, showErrorModal } from "./utils.js";
+import {
+  addBorderToMesh,
+  addBorderToObject3D,
+  removeBorderFromMesh,
+  removeBorderFromObject3D,
+  rgbToHex,
+  showErrorModal,
+} from "./utils.js";
 
 // Criar cena, câmera e renderizador
 const scene = new THREE.Scene();
@@ -59,68 +66,6 @@ camera.lookAt(0, 5, 0);
 // Variáveis para controle de movimento
 let moveSpeed = 0.1;
 const keysPressed = {};
-let storedObject = null;
-
-document
-  .getElementById("addModel")
-  .addEventListener("submit", function (event) {
-    event.preventDefault();
-
-    const loader = new OBJLoader();
-
-    const fileInput = document.getElementById("file");
-    const file = fileInput.files[0];
-    const reader = new FileReader();
-
-    // Extract the filename without extension
-    const filename = file.name.split(".").slice(0, -1).join(".");
-
-    // Load the texture based on the filename
-    const texture = new THREE.TextureLoader().load(
-      `../modelos/${filename}_texture.png`
-    );
-
-    reader.addEventListener("load", function (event) {
-      const contents = event.target.result;
-      const object = loader.parse(contents);
-
-      object.traverse(function (child) {
-        if (child instanceof THREE.Mesh) {
-          child.castShadow = true;
-          child.receiveShadow = true;
-
-          // Apply the texture to the material of the mesh
-          child.material.map = texture;
-          child.material.needsUpdate = true;
-        }
-      });
-
-      // Calculate the size of the model and the environment to adjust the size of the model
-      const boundingBox = new THREE.Box3().setFromObject(object);
-      const modelSize = boundingBox.getSize(new THREE.Vector3());
-      const roomSize = new THREE.Vector3(10, 10, 10);
-
-      // Assign a unique ID to the model
-      const userInput = document.getElementById("modelId").value;
-      const modelId = userInput;
-      object.name = modelId;
-      addManipulableObjectOption(object.name);
-
-      const scaleFactor = Math.min(
-        roomSize.x / modelSize.x,
-        roomSize.y / modelSize.y,
-        roomSize.z / modelSize.z
-      );
-      object.scale.set(scaleFactor * 0.3, scaleFactor * 0.3, scaleFactor * 0.3);
-
-      // Store the object for later manipulation
-      storedObject = object;
-
-      scene.add(object);
-    });
-
-    reader.readAsText(file);
-  });
 
 // Event listeners para teclas
 window.addEventListener("keydown", (event) => {
@@ -138,8 +83,8 @@ window.addEventListener("keyup", (event) => {
     return;
   }
 
-  if (event.key === "CapsLock" && selectedPrimitive) {
-    primitiveCollisionsEnabled = !primitiveCollisionsEnabled;
+  if (event.key === "CapsLock" && selectedObject) {
+    collisionsEnabled = !collisionsEnabled;
   }
 });
 
@@ -306,12 +251,12 @@ function getFormPrimitiveData() {
  * @param {string} primitive.rotationZ - The z-axis rotation of the primitive.
  * @param {string} primitive.attribute - The attribute of the primitive.
  * @param {string} primitive.attributeValue - The value of the attribute.
- * @param {boolean} [checkExistingId=true] - Whether to check if a primitive with the same id already exists.
+ * @param {boolean} [checkExistingId=true] - Whether to check if an object with the same id already exists.
  *
  * @returns {Primitive} The parsed primitive object.
  *
  * @throws If the id field is empty.
- * @throws If a primitive with the same id already exists.
+ * @throws If an object with the same id already exists.
  */
 function parsePrimitive(
   {
@@ -337,8 +282,8 @@ function parsePrimitive(
     throw new Error("O campo 'ID' é obrigatório.");
   }
 
-  if (checkExistingId && primitives[parsedId]) {
-    throw new Error(`Já existe uma primitiva com o id "${parsedId}".`);
+  if (checkExistingId && (primitives[parsedId] || models[parsedId])) {
+    throw new Error(`Já existe um objeto com o id "${parsedId}".`);
   }
 
   return {
@@ -360,13 +305,17 @@ function parsePrimitive(
 
 /**
  * Creates a primitive and adds it to the scene.
- * If a primitive with the same id already exists, it is replaced.
+ * If an object with the same id already exists, it is replaced.
  *
  * @param {Primitive} primitive - The primitive object.
  */
 function createPrimitive(primitive) {
   if (primitives[primitive.id]) {
     deletePrimitive(primitive.id);
+  }
+
+  if (models[primitive.id]) {
+    deleteModel(primitive.id);
   }
 
   const geometry = getPrimitiveGeometry(primitive);
@@ -447,8 +396,16 @@ function getPrimitiveMaterial({ attribute, attributeValue }) {
   return new THREE.MeshPhongMaterial({ color: attributeValue });
 }
 
-function isPrimitiveInsideRoom(primitive) {
-  const box = new THREE.Box3().setFromObject(primitive.mesh);
+/**
+ * Checks if a primitive is completely inside the room boundaries.
+ *
+ * @param {Primitive} primitive - The primitive object.
+ * @param {THREE.Mesh} primitive.mesh - The mesh to check.
+ *
+ * @returns {boolean} Returns true if the primitive is inside the room, false otherwise.
+ */
+function isPrimitiveInsideRoom({ mesh }) {
+  const box = new THREE.Box3().setFromObject(mesh);
 
   if (box.min.x < -5 || box.max.x > 5) {
     return false;
@@ -465,39 +422,321 @@ function isPrimitiveInsideRoom(primitive) {
   return true;
 }
 
-// ***************************
-// * PRIMITIVES MANIPULATION *
-// ***************************
-let selectedPrimitive = null;
+// *******************
+// * MODELS CREATION *
+// *******************
+/**
+ * @typedef {Object} Model
+ *
+ * @property {string} id - The unique identifier of the model.
+ * @property {number} height - The height of the model.
+ * @property {number} width - The width of the model.
+ * @property {number} depth - The depth of the model.
+ * @property {number} initialX - The x-coordinate of the model.
+ * @property {number} initialY - The y-coordinate of the model.
+ * @property {number} initialZ - The z-coordinate of the model.
+ * @property {number} rotationX - The x-axis rotation of the model.
+ * @property {number} rotationY - The y-axis rotation of the model.
+ * @property {number} rotationZ - The z-axis rotation of the model.
+ * @property {File | undefined} file - The file of the model. // name
+ * @property {string | undefined} fileName - The name of the file of the model.
+ * @property {THREE.Texture | undefined} texture - The texture of the model.
+ * @property {THREE.Object3D | undefined} object - The object of the model.
+ */
+
+const models = {};
+
+document
+  .getElementById("modelForm")
+  .addEventListener("submit", function (event) {
+    event.preventDefault();
+
+    const isUpdate =
+      document.getElementById("createModelButton").textContent ===
+      "Atualizar Modelo";
+
+    try {
+      const modelData = getFormModelData();
+      const model = parseModel(modelData, !isUpdate);
+      createModel(model);
+    } catch (error) {
+      showErrorModal("Erro", error.message);
+    }
+  });
+
+/**
+ * Retrieves the form data for a model object.
+ *
+ * @returns {Object} The model data object.
+ *
+ * @throws If the file field is empty.
+ */
+function getFormModelData() {
+  const id = document.getElementById("primitiveId").value;
+  const type = document.getElementById("primitiveType").value;
+
+  // Get the model dimensions
+  const height = document.getElementById("primitiveHeight").value;
+  const width = document.getElementById("primitiveWidth").value;
+  const depth = document.getElementById("primitiveDepth").value;
+
+  // Get the model position
+  const initialX = document.getElementById("primitiveX").value;
+  const initialY = document.getElementById("primitiveY").value;
+  const initialZ = document.getElementById("primitiveZ").value;
+
+  // Get the model rotation
+  const rotationX = document.getElementById("primitiveRotationX").value;
+  const rotationY = document.getElementById("primitiveRotationY").value;
+  const rotationZ = document.getElementById("primitiveRotationZ").value;
+
+  // Get the model file
+  const fileInput = document.getElementById("file");
+  const file = fileInput.files[0];
+
+  if (!file) {
+    throw new Error("O ficheiro é obrigatório.");
+  }
+
+  return {
+    id,
+    type,
+    height,
+    width,
+    depth,
+    initialX,
+    initialY,
+    initialZ,
+    rotationX,
+    rotationY,
+    rotationZ,
+    file,
+  };
+}
+
+/**
+ * Parses a model object and returns a standardized representation.
+ * The texture of the model is loaded from a file with the same name as the model file.
+ *
+ * @param {Object} model - The model object.
+ * @param {string} model.id - The unique identifier of the model.
+ * @param {string} model.height - The height of the model.
+ * @param {string} model.width - The width of the model.
+ * @param {string} model.depth - The depth of the model.
+ * @param {string} model.initialX - The initial x-coordinate of the model.
+ * @param {string} model.initialY - The initial y-coordinate of the model.
+ * @param {string} model.initialZ - The initial z-coordinate of the model.
+ * @param {string} model.rotationX - The x-axis rotation of the model.
+ * @param {string} model.rotationY - The y-axis rotation of the model.
+ * @param {string} model.rotationZ - The z-axis rotation of the model.
+ * @param {File} model.file - The file of the model.
+ * @param {boolean} [checkExistingId=true] - Whether to check if an object with the same id already exists.
+ *
+ * @returns {Model} The parsed model object.
+ *
+ * @throws If the id field is empty.
+ * @throws If an object with the same id already exists.
+ */
+function parseModel(
+  {
+    id,
+    height,
+    width,
+    depth,
+    initialX,
+    initialY,
+    initialZ,
+    rotationX,
+    rotationY,
+    rotationZ,
+    file,
+  },
+  checkExistingId = true
+) {
+  const parsedId = id.trim();
+
+  if (!parsedId) {
+    throw new Error("O campo 'ID' é obrigatório.");
+  }
+
+  if (checkExistingId && (primitives[parsedId] || models[parsedId])) {
+    throw new Error(`Já existe um objeto com o id "${parsedId}".`);
+  }
+
+  const fileName = file.name.split(".").slice(0, -1).join(".");
+
+  const texture = new THREE.TextureLoader().load(
+    `../modelos/${fileName}_texture.png`
+  );
+
+  return {
+    id: parsedId,
+    height: parseFloat(height) || 1,
+    width: parseFloat(width) || 1,
+    depth: parseFloat(depth) || 1,
+    initialX: parseFloat(initialX) || 0,
+    initialY: parseFloat(initialY) || height / 2,
+    initialZ: parseFloat(initialZ) || 0,
+    rotationX: parseFloat(rotationX) || 0,
+    rotationY: parseFloat(rotationY) || 0,
+    rotationZ: parseFloat(rotationZ) || 0,
+    file,
+    fileName,
+    texture,
+  };
+}
+
+/**
+ * Creates a model and adds it to the scene.
+ * If an object with the same id already exists, it is replaced.
+ *
+ * @param {Model} model - The model object.
+ */
+function createModel(model) {
+  if (models[model.id]) {
+    deleteModel(model.id);
+  }
+
+  if (primitives[model.id]) {
+    deletePrimitive(model.id);
+  }
+
+  const reader = new FileReader();
+  reader.addEventListener("load", function (event) {
+    const contents = event.target.result;
+
+    const loader = new OBJLoader();
+    const object = loader.parse(contents);
+
+    object.traverse(function (child) {
+      if (child instanceof THREE.Mesh) {
+        child.castShadow = true;
+        child.receiveShadow = true;
+
+        child.material.map = model.texture;
+        child.material.needsUpdate = true;
+      }
+    });
+
+    object.position.set(model.initialX, model.initialY, model.initialZ);
+
+    object.rotation.set(
+      THREE.MathUtils.degToRad(model.rotationX),
+      THREE.MathUtils.degToRad(model.rotationY),
+      THREE.MathUtils.degToRad(model.rotationZ)
+    );
+
+    const height = model.height / 10;
+    const width = model.width / 10;
+    const depth = model.depth / 10;
+
+    const boundingBox = new THREE.Box3().setFromObject(object);
+    const modelSize = boundingBox.getSize(new THREE.Vector3());
+    const roomSize = new THREE.Vector3(10, 10, 10);
+
+    const scaleFactorX = roomSize.x / modelSize.x;
+    const scaleFactorY = roomSize.y / modelSize.y;
+    const scaleFactorZ = roomSize.z / modelSize.z;
+
+    object.scale.set(
+      scaleFactorX * height,
+      scaleFactorY * width,
+      scaleFactorZ * depth
+    );
+
+    model.object = object;
+    models[model.id] = model;
+
+    if (!isModelInsideRoom(model)) {
+      delete models[model.id];
+      showErrorModal("Erro", "O modelo não pode ser criado fora da sala.");
+      return;
+    }
+
+    scene.add(object);
+    addManipulableObjectOption(model.id);
+  });
+
+  reader.readAsText(model.file);
+}
+
+function deleteModel(id) {
+  if (!models[id]) {
+    showErrorModal("Erro", `Não existe um modelo com o id "${id}".`);
+    return;
+  }
+
+  removeManipulableObjectOption(id);
+  deselectObject();
+  scene.remove(models[id].object);
+  delete models[id];
+}
+
+/**
+ * Checks if a model is completely inside the room boundaries.
+ *
+ * @param {Model} model - The model object.
+ * @param {THREE.Object3D} model.object - The object to check.
+ *
+ * @returns {boolean} Returns true if the model is inside the room, false otherwise.
+ */
+function isModelInsideRoom({ object }) {
+  const box = new THREE.Box3().setFromObject(object);
+
+  if (box.min.x < -5 || box.max.x > 5) {
+    return false;
+  }
+
+  if (box.min.y < 0 || box.max.y > 10) {
+    return false;
+  }
+
+  if (box.min.z < -5 || box.max.z > 5) {
+    return false;
+  }
+
+  return true;
+}
+
+// ************************
+// * OBJECTS MANIPULATION *
+// ************************
 let selectedObject = null;
+let collisionsEnabled = false;
 
-let primitiveCollisionsEnabled = false;
-
-export function onManipulateObjectButtonClick() {
+export function handleManipulateObjectButtonClick() {
   const id = document.getElementById("manipulableObjectId").value;
+
   if (!id) {
     return;
   }
 
-  if (!primitives[id] && !storedObject) {
-    showErrorModal("Erro", `Não existe uma primitiva com o id "${id}".`);
+  if (!primitives[id] && !models[id]) {
+    showErrorModal("Erro", `Não existe um objeto com o id "${id}".`);
     return;
   }
+
   selectObject(id);
 }
 
-export function onDeleteObjectButtonClick() {
+export function handleDeleteObjectButtonClick() {
   const id = document.getElementById("manipulableObjectId").value;
 
   if (!id) {
     return;
   }
 
-  deletePrimitive(id);
+  if (primitives[id]) {
+    deletePrimitive(id);
+  }
+
+  if (models[id]) {
+    deleteModel(id);
+  }
 }
 
 function updateSelectedObject() {
-  if (!selectedPrimitive) {
+  if (!selectedObject) {
     return;
   }
 
@@ -507,7 +746,12 @@ function updateSelectedObject() {
   }
 
   if (keysPressed["delete"] || keysPressed["backspace"]) {
-    deletePrimitive(selectedPrimitive.id);
+    if (primitives[selectedObject.id]) {
+      deletePrimitive(selectedObject.id);
+    }
+    if (models[selectedObject.id]) {
+      deleteModel(selectedObject.id);
+    }
     return;
   }
 
@@ -532,7 +776,9 @@ function updateSelectedObject() {
     translation.y -= 0.05;
   }
 
-  const box = new THREE.Box3().setFromObject(selectedPrimitive.mesh);
+  const box = new THREE.Box3().setFromObject(
+    selectedObject.mesh ?? selectedObject.object
+  );
   const newBox = box.clone().translate(translation);
 
   if (newBox.min.x < -5 || newBox.max.x > 5) {
@@ -546,148 +792,93 @@ function updateSelectedObject() {
   if (newBox.min.z < -5 || newBox.max.z > 5) {
     translation.z = 0;
   }
-  console.log(primitiveCollisionsEnabled);
-  if (primitiveCollisionsEnabled) {
-    for (const id in primitives) {
-      if (id === selectedPrimitive.id) {
-        continue;
-      }
 
-      const primitive = primitives[id];
-      const otherBox = new THREE.Box3().setFromObject(primitive.mesh);
-
-      if (newBox.intersectsBox(otherBox)) {
-        translation.set(0, 0, 0);
-        break;
-      }
-    }
+  if (
+    collisionsEnabled &&
+    isCollidingWithOtherObjects(selectedObject.id, newBox)
+  ) {
+    translation.set(0, 0, 0);
   }
 
   if (translation.length() > 0) {
-    selectedPrimitive.mesh.position.add(translation);
+    selectedObject.mesh?.position.add(translation);
+    selectedObject.object?.position.add(translation);
   }
 
   requestAnimationFrame(updateSelectedObject);
 }
 
-function updateStoredObject() {
-  if (!storedObject) {
-    return;
-  }
+/**
+ * Checks if the given object is colliding with other objects in the scene.
+ *
+ * @param {string} objectId - The ID of the object to check for collisions.
+ * @param {THREE.Box3} box - The bounding box of the object.
+ *
+ * @returns {boolean} - True if the object is colliding with other objects, false otherwise.
+ */
+function isCollidingWithOtherObjects(objectId, box) {
+  for (const id in primitives) {
+    if (id === objectId) {
+      continue;
+    }
 
-  if (keysPressed["enter"]) {
-    deselectObject();
-    return;
-  }
+    const primitive = primitives[id];
+    const otherBox = new THREE.Box3().setFromObject(primitive.mesh);
 
-  if (keysPressed["delete"] || keysPressed["backspace"]) {
-    deletePrimitive(storedObject.id);
-    return;
-  }
-
-  const translation = new THREE.Vector3();
-
-  if (keysPressed["arrowup"]) {
-    translation.z -= 0.05;
-  }
-  if (keysPressed["arrowdown"]) {
-    translation.z += 0.05;
-  }
-  if (keysPressed["arrowleft"]) {
-    translation.x -= 0.05;
-  }
-  if (keysPressed["arrowright"]) {
-    translation.x += 0.05;
-  }
-  if (keysPressed["pageup"]) {
-    translation.y += 0.05;
-  }
-  if (keysPressed["pagedown"]) {
-    translation.y -= 0.05;
-  }
-
-  const box = new THREE.Box3().setFromObject(storedObject);
-  const newBox = box.clone().translate(translation);
-
-  if (newBox.min.x < -5 || newBox.max.x > 5) {
-    translation.x = 0;
-  }
-
-  if (newBox.min.y < 0 || newBox.max.y > 10) {
-    translation.y = 0;
-  }
-
-  if (newBox.min.z < -5 || newBox.max.z > 5) {
-    translation.z = 0;
-  }
-
-  // Check for collisions with other primitives
-  if (primitiveCollisionsEnabled) {
-    for (const id in primitives) {
-      const primitive = primitives[id];
-      const otherBox = new THREE.Box3().setFromObject(primitive.mesh);
-
-      if (newBox.intersectsBox(otherBox)) {
-        translation.set(0, 0, 0);
-        break;
-      }
+    if (box.intersectsBox(otherBox)) {
+      return true;
     }
   }
 
-  if (translation.length() > 0) {
-    storedObject.position.add(translation);
+  for (const id in models) {
+    if (id === objectId) {
+      continue;
+    }
+
+    const model = models[id];
+    const otherBox = new THREE.Box3().setFromObject(model.object);
+
+    if (box.intersectsBox(otherBox)) {
+      return true;
+    }
   }
 
-  requestAnimationFrame(updateStoredObject);
+  return false;
 }
 
 function selectObject(id) {
-  // Deselect the previously selected object, if any
-  if (selectedPrimitive || selectedObject) {
+  if (selectedObject) {
     deselectObject();
   }
 
-  // Check if the id matches a primitive
   if (primitives[id]) {
-    selectedPrimitive = primitives[id];
-    addBorder(selectedPrimitive.mesh);
-    updateSelectedObject(selectedPrimitive.id);
-    updateSelectedManipulableObject(selectedPrimitive);
+    selectedObject = primitives[id];
+    addBorderToMesh(selectedObject.mesh);
   }
-  // Check if the id matches the name of the storedObject
-  if (storedObject && storedObject.name === id) {
-    selectedObject = storedObject;
-    //addBorder(selectedObject);
-    updateStoredObject(selectedObject.name);
-    updateSelectedManipulableObject(selectedObject);
+
+  if (models[id]) {
+    selectedObject = models[id];
+    addBorderToObject3D(selectedObject.object);
   }
+
+  updateSelectedObject(selectedObject.id);
+  updateSelectedManipulableObject(selectedObject);
 }
 
 function deselectObject() {
-  if (selectedPrimitive) {
-    removeBorder(selectedPrimitive.mesh);
-    selectedPrimitive = null;
-  }
-
-  if (storedObject) {
-    // Add any necessary actions to deselect the storedObject
-    storedObject = null;
+  if (selectedObject) {
+    if (selectedObject.mesh) {
+      removeBorderFromMesh(selectedObject.mesh);
+    }
+    if (selectedObject.object) {
+      removeBorderFromObject3D(selectedObject.object);
+    }
+    selectedObject = null;
   }
 
   updateSelectedManipulableObject();
 }
 
-function addBorder(mesh) {
-  const border = new THREE.LineSegments(
-    new THREE.EdgesGeometry(mesh.geometry),
-    new THREE.LineBasicMaterial({ color: "white" })
-  );
-  mesh.add(border);
-}
-
-function removeBorder(mesh) {
-  mesh.remove(mesh.children.find((child) => child.isLineSegments));
-}
 // **********
 // * LIGHTS *
 // **********
