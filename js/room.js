@@ -73,14 +73,33 @@ let moveSpeed = 0.1;
 const keysPressed = {};
 
 // Event listeners for keys
-window.addEventListener("keydown", (event) => {
+window.addEventListener("keydown", handleKeyDown);
+
+/**
+ * Handles the keydown event.
+ * Updates the keys pressed object with the pressed key.
+ * If the controls are not enabled, the function returns early.
+ *
+ * @param {KeyboardEvent} event - The keydown event object.
+ */
+function handleKeyDown(event) {
   if (!controls.enabled) {
     return;
   }
   keysPressed[event.key.toLowerCase()] = true;
-});
+}
 
-window.addEventListener("keyup", (event) => {
+window.addEventListener("keyup", handleKeyUp);
+
+/**
+ * Handles the key up event.
+ * Updates the keys pressed object with the released key.
+ * If the controls are not enabled, the function returns early.
+ * If the CapsLock key is released and an object is selected, collisions are toggled.
+ *
+ * @param {KeyboardEvent} event - The key up event object.
+ */
+function handleKeyUp(event) {
   keysPressed[event.key.toLowerCase()] = false;
   if (!controls.enabled) {
     return;
@@ -88,7 +107,7 @@ window.addEventListener("keyup", (event) => {
   if (event.key === "CapsLock" && selectedObject) {
     collisionsEnabled = !collisionsEnabled;
   }
-});
+}
 
 /**
  * Updates the camera position based on the keys pressed.
@@ -136,17 +155,30 @@ updateCamera();
 const controls = new PointerLockControls(camera, document.body);
 
 // Event listeners for mouse movement
-document.addEventListener("pointerlockchange", () => {
+document.addEventListener("pointerlockchange", handlePointerLockChange);
+
+/**
+ * Handles the change event for pointer lock.
+ */
+function handlePointerLockChange() {
   if (document.pointerLockElement === document.body) {
     controls.enabled = true;
   } else {
     controls.enabled = false;
   }
-});
+}
 
-document.getElementById("gl-canvas").addEventListener("click", () => {
+document
+  .getElementById("gl-canvas")
+  .addEventListener("click", handleCanvasClick);
+
+/**
+ * Handles the click event on the canvas element.
+ * Requests pointer lock for the document body.
+ */
+function handleCanvasClick() {
   document.body.requestPointerLock();
-});
+}
 
 // ***********************
 // * PRIMITIVES CREATION *
@@ -173,7 +205,20 @@ document.getElementById("gl-canvas").addEventListener("click", () => {
 const maxPrimitives = 10;
 const primitives = {};
 
-document.getElementById("primitiveForm").addEventListener("submit", (event) => {
+document
+  .getElementById("primitiveForm")
+  .addEventListener("submit", handlePrimitiveFormSubmit);
+
+/**
+ * Handles the form submission for creating or updating a primitive.
+ * Prevents the default form submission behavior.
+ * Checks if the maximum number of primitives has been reached.
+ * Parses the form data and creates a primitive object.
+ * If an error occurs, an error modal is shown.
+ *
+ * @param {Event} event The form submission event.
+ */
+function handlePrimitiveFormSubmit(event) {
   event.preventDefault();
 
   const count = Object.keys(primitives).length;
@@ -197,7 +242,7 @@ document.getElementById("primitiveForm").addEventListener("submit", (event) => {
   } catch (error) {
     showErrorModal("Erro", error.message);
   }
-});
+}
 
 /**
  * Retrieves the form data for a primitive object.
@@ -466,31 +511,42 @@ const models = {};
 
 document
   .getElementById("modelForm")
-  .addEventListener("submit", function (event) {
-    event.preventDefault();
+  .addEventListener("submit", handleModelFormSubmit);
 
-    const count = Object.keys(models).length;
+/**
+ * Handles the form submission for adding or updating a model.
+ * Prevents the default form submission behavior.
+ * Checks if the maximum number of models has been reached.
+ * Parses the form data and creates a model object.
+ * If an error occurs, an error modal is shown.
+ *
+ * @param {Event} event - The form submission event.
+ */
+function handleModelFormSubmit(event) {
+  event.preventDefault();
 
-    if (count >= maxModels) {
-      showErrorModal(
-        "Erro",
-        `O número máximo de modelos foi atingido (${count}/${maxModels}).`
-      );
-      return;
-    }
+  const count = Object.keys(models).length;
 
-    const isUpdate =
-      document.getElementById("createModelButton").textContent ===
-      "Atualizar Modelo";
+  if (count >= maxModels) {
+    showErrorModal(
+      "Erro",
+      `O número máximo de modelos foi atingido (${count}/${maxModels}).`
+    );
+    return;
+  }
 
-    try {
-      const modelData = getFormModelData();
-      const model = parseModel(modelData, !isUpdate);
-      createModel(model);
-    } catch (error) {
-      showErrorModal("Erro", error.message);
-    }
-  });
+  const isUpdate =
+    document.getElementById("createModelButton").textContent ===
+    "Atualizar Modelo";
+
+  try {
+    const modelData = getFormModelData();
+    const model = parseModel(modelData, !isUpdate);
+    createModel(model);
+  } catch (error) {
+    showErrorModal("Erro", error.message);
+  }
+}
 
 /**
  * Retrieves the form data for a model object.
