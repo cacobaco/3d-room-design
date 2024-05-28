@@ -461,12 +461,23 @@ function isPrimitiveInsideRoom({ mesh }) {
  * @property {THREE.Object3D | undefined} object - The object of the model.
  */
 
+const maxModels = 5;
 const models = {};
 
 document
   .getElementById("modelForm")
   .addEventListener("submit", function (event) {
     event.preventDefault();
+
+    const count = Object.keys(models).length;
+
+    if (count >= maxModels) {
+      showErrorModal(
+        "Erro",
+        `O número máximo de modelos foi atingido (${count}/${maxModels}).`
+      );
+      return;
+    }
 
     const isUpdate =
       document.getElementById("createModelButton").textContent ===
