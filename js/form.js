@@ -8,14 +8,27 @@ const primitiveAttributeSelect = document.getElementById("primitiveAttribute");
 const primitiveColorSelect = document.getElementById("primitiveColor");
 const primitiveTextureSelect = document.getElementById("primitiveTexture");
 
-primitiveAttributeSelect.addEventListener("change", function () {
-  if (this.value === "color") {
+primitiveAttributeSelect.addEventListener("change", handleAttributeChange);
+
+/**
+ * Handles the attribute change event.
+ * Changes the display of the color and texture select elements based on the selected attribute.
+ * If the attribute is color, the color select is displayed and required, while the texture select is hidden and not required.
+ * If the attribute is texture, the texture select is displayed and required, while the color select is hidden and not required.
+ * If the attribute is neither color nor texture, both selects are hidden and not required.
+ *
+ * @param {Event} event - The attribute change event.
+ */
+function handleAttributeChange(event) {
+  const value = event.target.value;
+
+  if (value === "color") {
     primitiveTextureSelect.style.display = "none";
     primitiveTextureSelect.removeAttribute("required");
 
     primitiveColorSelect.style.display = "block";
     primitiveColorSelect.setAttribute("required", true);
-  } else if (this.value === "texture") {
+  } else if (value === "texture") {
     primitiveColorSelect.style.display = "none";
     primitiveColorSelect.removeAttribute("required");
 
@@ -28,11 +41,19 @@ primitiveAttributeSelect.addEventListener("change", function () {
     primitiveTextureSelect.style.display = "none";
     primitiveTextureSelect.removeAttribute("required");
   }
-});
+}
 
-primitiveColorSelect.addEventListener("change", function () {
-  this.style.color = this.value;
-});
+primitiveColorSelect.addEventListener("change", handleColorChange);
+
+/**
+ * Handles the color change event.
+ * Changes the color of the color select element based on the selected color.
+ *
+ * @param {Event} event - The color change event.
+ */
+function handleColorChange(event) {
+  event.target.style.color = event.target.value;
+}
 
 const manipulableObjectsSelect = document.getElementById("manipulableObjectId");
 
@@ -152,8 +173,22 @@ const resetPointLightForm = document.getElementById("resetPointLightForm");
 const addSpotLightForm = document.getElementById("addSpotLightForm");
 const resetSpotLightForm = document.getElementById("resetSpotLightForm");
 
-lightSelect.addEventListener("change", function () {
-  if (this.value === "directional") {
+lightSelect.addEventListener("change", handleLightChange);
+
+/**
+ * Handles the change event for the light selection.
+ * Changes the display of the light forms based on the selected light type.
+ * If the light type is directional, the directional light form is displayed and the other light forms are hidden.
+ * If the light type is ambiental, the ambiental light form is displayed and the other light forms are hidden.
+ * If the light type is point, the point light form is displayed and the other light forms are hidden.
+ * If the light type is any other, the spot light form is displayed and the other light forms are hidden.
+ *
+ * @param {Event} event - The change event object.
+ */
+function handleLightChange(event) {
+  const value = event.target.value;
+
+  if (value === "directional") {
     addAmbientLightForm.style.display = "none";
     resetAmbientLightForm.style.display = "none";
     addPointLightForm.style.display = "none";
@@ -162,7 +197,7 @@ lightSelect.addEventListener("change", function () {
     resetSpotLightForm.style.display = "none";
     addDirectionalLightForm.style.display = "block";
     resetDirectionalLightForm.style.display = "block";
-  } else if (this.value === "ambiental") {
+  } else if (value === "ambiental") {
     addAmbientLightForm.style.display = "block";
     resetAmbientLightForm.style.display = "block";
     addSpotLightForm.style.display = "none";
@@ -171,7 +206,7 @@ lightSelect.addEventListener("change", function () {
     resetPointLightForm.style.display = "none";
     addDirectionalLightForm.style.display = "none";
     resetDirectionalLightForm.style.display = "none";
-  } else if (this.value === "point") {
+  } else if (value === "point") {
     addPointLightForm.style.display = "block";
     resetPointLightForm.style.display = "block";
     addAmbientLightForm.style.display = "none";
@@ -190,4 +225,4 @@ lightSelect.addEventListener("change", function () {
     addDirectionalLightForm.style.display = "none";
     resetDirectionalLightForm.style.display = "none";
   }
-});
+}
