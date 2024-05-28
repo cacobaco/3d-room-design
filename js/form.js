@@ -36,6 +36,11 @@ primitiveColorSelect.addEventListener("change", function () {
 
 const manipulableObjectsSelect = document.getElementById("manipulableObjectId");
 
+/**
+ * Adds a manipulable object option to the select element.
+ *
+ * @param {string} objectId - The ID of the object to be added as an option.
+ */
 export function addManipulableObjectOption(objectId) {
   const option = document.createElement("option");
   option.value = objectId;
@@ -43,6 +48,11 @@ export function addManipulableObjectOption(objectId) {
   manipulableObjectsSelect.appendChild(option);
 }
 
+/**
+ * Removes the option with the specified objectId from the manipulableObjectsSelect element.
+ *
+ * @param {string} objectId - The ID of the object to be removed.
+ */
 export function removeManipulableObjectOption(objectId) {
   manipulableObjectsSelect.removeChild(
     manipulableObjectsSelect.querySelector(`option[value="${objectId}"]`)

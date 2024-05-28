@@ -15,7 +15,10 @@ import {
   showErrorModal,
 } from "./utils.js";
 
-// Criar cena, câmera e renderizador
+// ***************
+// * SCENE SETUP *
+// ***************
+// Create scene, camera, and renderer
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, 800 / 800, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer({
@@ -23,13 +26,15 @@ const renderer = new THREE.WebGLRenderer({
 });
 renderer.setSize(800, 800);
 
-// Configurar cor de fundo do renderizador
+// Set renderer background color
 renderer.setClearColor(0x87ceeb);
 
-renderer.shadowMap.enabled = true; // Habilitar sombras
-renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Tipo de sombra (suavização)
+// Enable shadows
+renderer.shadowMap.enabled = true;
+// Set shadow map type for soft shadows
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-// Material para paredes e chão
+// Material for walls and floor
 const wallTexture = new THREE.TextureLoader().load("../textures/wall.jpg");
 const wallMaterial = new THREE.MeshPhongMaterial({
   map: wallTexture,
@@ -39,7 +44,7 @@ const floorMaterial = new THREE.MeshPhongMaterial({
   map: floorTexture,
 });
 
-// Criar paredes
+// Create walls
 const wallGeometry = new THREE.PlaneGeometry(10, 10);
 const wall1 = new THREE.Mesh(wallGeometry, wallMaterial);
 wall1.position.set(0, 5, -5);
@@ -51,7 +56,7 @@ wall2.rotation.y = Math.PI / 2;
 wall2.receiveShadow = true;
 scene.add(wall2);
 
-// Criar chão
+// Create floor
 const floorGeometry = new THREE.PlaneGeometry(10, 10);
 const floor = new THREE.Mesh(floorGeometry, floorMaterial);
 floor.rotation.x = -Math.PI / 2;
@@ -59,36 +64,44 @@ floor.position.set(0, 0, 0);
 floor.receiveShadow = true;
 scene.add(floor);
 
-// Configurar a posição inicial da câmera
+// Set the initial position of the camera
 camera.position.set(5, 5, 15);
 camera.lookAt(0, 5, 0);
 
-// Variáveis para controle de movimento
+// Variables for movement control
 let moveSpeed = 0.1;
 const keysPressed = {};
 
-// Event listeners para teclas
+// Event listeners for keys
 window.addEventListener("keydown", (event) => {
   if (!controls.enabled) {
     return;
   }
-
   keysPressed[event.key.toLowerCase()] = true;
 });
 
 window.addEventListener("keyup", (event) => {
   keysPressed[event.key.toLowerCase()] = false;
-
   if (!controls.enabled) {
     return;
   }
-
   if (event.key === "CapsLock" && selectedObject) {
     collisionsEnabled = !collisionsEnabled;
   }
 });
 
-// Controle de movimento WASD
+/**
+ * Updates the camera position based on the keys pressed.
+ *
+ * The camera can be moved using the following keys:
+ * - W: Move forward
+ * - S: Move backward
+ * - A: Move left
+ * - D: Move right
+ * - Q: Move up
+ * - E: Move down
+ * - Space: Increase movement speed
+ */
 function updateCamera() {
   if (keysPressed[" "]) {
     moveSpeed = 0.5;
@@ -119,10 +132,10 @@ function updateCamera() {
 }
 updateCamera();
 
-// Usar PointerLockControls para navegação estilo FPS
+// Use PointerLockControls for FPS-style navigation
 const controls = new PointerLockControls(camera, document.body);
 
-// Event listeners para controle de rotação com o mouse
+// Event listeners for mouse movement
 document.addEventListener("pointerlockchange", () => {
   if (document.pointerLockElement === document.body) {
     controls.enabled = true;
@@ -345,6 +358,11 @@ function createPrimitive(primitive) {
   addManipulableObjectOption(primitive.id);
 }
 
+/**
+ * Deletes a primitive from the scene.
+ *
+ * @param {string} id - The ID of the primitive to delete.
+ */
 function deletePrimitive(id) {
   if (!primitives[id]) {
     showErrorModal("Erro", `Não existe uma primitiva com o id "${id}".`);
@@ -660,6 +678,11 @@ function createModel(model) {
   reader.readAsText(model.file);
 }
 
+/**
+ * Deletes a model from the scene.
+ *
+ * @param {string} id - The ID of the model to be deleted.
+ */
 function deleteModel(id) {
   if (!models[id]) {
     showErrorModal("Erro", `Não existe um modelo com o id "${id}".`);
@@ -704,6 +727,11 @@ function isModelInsideRoom({ object }) {
 let selectedObject = null;
 let collisionsEnabled = false;
 
+/**
+ * Handles the click event of the manipulate object button.
+ * Retrieves the id of the manipulable object from the input field,
+ * checks if the object exists, and selects the object.
+ */
 export function handleManipulateObjectButtonClick() {
   const id = document.getElementById("manipulableObjectId").value;
 
@@ -719,6 +747,10 @@ export function handleManipulateObjectButtonClick() {
   selectObject(id);
 }
 
+/**
+ * Handles the click event of the delete object button.
+ * Deletes the primitive or model with the specified ID.
+ */
 export function handleDeleteObjectButtonClick() {
   const id = document.getElementById("manipulableObjectId").value;
 
@@ -735,6 +767,16 @@ export function handleDeleteObjectButtonClick() {
   }
 }
 
+/**
+ * Updates the position of the selected object based on the keys pressed.
+ * If the selected object is null, the function returns early.
+ * If the "enter" key is pressed, the selected object is deselected.
+ * If the "delete" or "backspace" key is pressed, the selected object is deleted.
+ * The position of the selected object is updated based on the arrow keys and page up/down keys.
+ * The position is constrained within certain bounds.
+ * If collisions are enabled, the position is adjusted to avoid collisions with other objects.
+ * The function is called recursively using requestAnimationFrame.
+ */
 function updateSelectedObject() {
   if (!selectedObject) {
     return;
@@ -846,6 +888,13 @@ function isCollidingWithOtherObjects(objectId, box) {
   return false;
 }
 
+/**
+ * Selects an object based on its ID and updates the selected object.
+ * If the object is a primitive, it adds a border to its mesh.
+ * If the object is a model, it adds a border to its Object3D.
+ *
+ * @param {string} id - The ID of the object to be selected.
+ */
 function selectObject(id) {
   if (selectedObject) {
     deselectObject();
@@ -865,6 +914,9 @@ function selectObject(id) {
   updateSelectedManipulableObject(selectedObject);
 }
 
+/**
+ * Deselects the currently selected object.
+ */
 function deselectObject() {
   if (selectedObject) {
     if (selectedObject.mesh) {
@@ -894,6 +946,12 @@ let lightCone = null;
 let directionalTarget = null;
 let spotTarget = null;
 
+/**
+ * Creates a light sphere at the specified position with the given color.
+ *
+ * @param {THREE.Vector3} position - The position of the light sphere.
+ * @param {number} color - The color of the light sphere.
+ */
 function createLightSphere(position, color) {
   scene.remove(sphere);
   const sphereGeometry = new THREE.SphereGeometry(0.5, 16, 16);
@@ -903,6 +961,12 @@ function createLightSphere(position, color) {
   scene.add(sphere);
 }
 
+/**
+ * Creates an arrow helper to visualize the direction of a new directional light.
+ *
+ * @param {THREE.Light} newDirectionalLight - The new directional light.
+ * @param {THREE.Color} color - The color of the arrow helper.
+ */
 function createArrowHelper(newDirectionalLight, color) {
   scene.remove(arrowHelper);
   const dirVector = new THREE.Vector3()
@@ -917,6 +981,12 @@ function createArrowHelper(newDirectionalLight, color) {
   scene.add(arrowHelper);
 }
 
+/**
+ * Creates a spotlight cone and adds it to the scene.
+ *
+ * @param {THREE.SpotLight} spotLight - The spotlight to create the cone for.
+ * @param {number} color - The color of the cone.
+ */
 function createSpotLightCone(spotLight, color) {
   scene.remove(lightCone);
   const coneGeometry = new THREE.ConeGeometry(0.5, 1, 32);
@@ -933,9 +1003,9 @@ function createSpotLightCone(spotLight, color) {
   lightCone = cone;
 }
 
-// ***************
-// * DIRECTIONAL *
-// ***************
+// **********************
+// * DIRECTIONAL LIGHTS *
+// **********************
 document
   .getElementById("addDirectionalLightForm")
   .addEventListener("submit", (event) => {
@@ -953,6 +1023,11 @@ document
     scene.remove(arrowHelper);
   });
 
+/**
+ * Retrieves the form values for light position, direction, and color.
+ *
+ * @returns {Object} An object containing the form values for light position, direction, and color.
+ */
 function getFormLight() {
   const posX = document.getElementById("lightPosX").value;
   const posY = document.getElementById("lightPosY").value;
@@ -977,20 +1052,20 @@ function getFormLight() {
   };
 }
 
-function parseLight({ posX, posY, posZ, dirX, dirY, dirZ, R, G, B }) {
-  return {
-    posX: parseFloat(posX) || 1,
-    posY: parseFloat(posY) || 1,
-    posZ: parseFloat(posZ) || 1,
-    dirX: parseFloat(dirX) || 1,
-    dirY: parseFloat(dirY) || 1,
-    dirZ: parseFloat(dirZ) || 1,
-    R: parseFloat(R) || 1,
-    G: parseFloat(G) || 1,
-    B: parseFloat(B) || 1,
-  };
-}
-
+/**
+ * Creates a new directional light with the specified parameters and adds it to the scene.
+ *
+ * @param {Object} light - The light object for creating the light.
+ * @param {number} light.posX - The x-coordinate of the light's position.
+ * @param {number} light.posY - The y-coordinate of the light's position.
+ * @param {number} light.posZ - The z-coordinate of the light's position.
+ * @param {number} light.dirX - The x-coordinate of the light's target position.
+ * @param {number} light.dirY - The y-coordinate of the light's target position.
+ * @param {number} light.dirZ - The z-coordinate of the light's target position.
+ * @param {number} light.R - The red component of the light's color (0-255).
+ * @param {number} light.G - The green component of the light's color (0-255).
+ * @param {number} light.B - The blue component of the light's color (0-255).
+ */
 function createLight({ posX, posY, posZ, dirX, dirY, dirZ, R, G, B }) {
   scene.remove(directionalTarget);
   const color = rgbToHex(R, G, B);
@@ -1010,9 +1085,9 @@ function createLight({ posX, posY, posZ, dirX, dirY, dirZ, R, G, B }) {
   directionalLight = newDirectionalLight;
 }
 
-// *************
-// * AMBIENTAL *
-// *************
+// ******************
+// * AMBIENT LIGHTS *
+// ******************
 document
   .getElementById("addAmbientLightForm")
   .addEventListener("submit", (event) => {
@@ -1029,6 +1104,11 @@ document
     scene.remove(ambientLight);
   });
 
+/**
+ * Retrieves the values of the ambient light form inputs.
+ *
+ * @returns {Object} An object containing the intensity, R, G, and B values.
+ */
 function getFormAmbientLight() {
   const intensity = document.getElementById("ambientLightIntensity").value;
   const R = document.getElementById("ambientLightR").value;
@@ -1043,6 +1123,15 @@ function getFormAmbientLight() {
   };
 }
 
+/**
+ * Creates an ambient light and adds it to the scene.
+ *
+ * @param {Object} light - The light object for creating the ambient light.
+ * @param {number} light.intensity - The intensity of the ambient light.
+ * @param {number} light.R - The red component of the ambient light color.
+ * @param {number} light.G - The green component of the ambient light color.
+ * @param {number} light.B - The blue component of the ambient light color.
+ */
 function createAmbientLight({ intensity, R, G, B }) {
   const color = rgbToHex(R, G, B);
   const newAmbientLight = new THREE.AmbientLight(color, intensity);
@@ -1050,9 +1139,9 @@ function createAmbientLight({ intensity, R, G, B }) {
   ambientLight = newAmbientLight;
 }
 
-// *************
-// *** POINT ***
-// *************
+// ****************
+// * POINT LIGHTS *
+// ****************
 document
   .getElementById("addPointLightForm")
   .addEventListener("submit", (event) => {
@@ -1070,6 +1159,11 @@ document
     scene.remove(sphere);
   });
 
+/**
+ * Retrieves the values from the form inputs and returns an object containing the point light properties.
+ *
+ * @returns {Object} An object containing the point light properties.
+ */
 function getFormPointLight() {
   const intensity = document.getElementById("pointLightIntensity").value;
   const posX = document.getElementById("pointLightPosX").value;
@@ -1092,6 +1186,19 @@ function getFormPointLight() {
   };
 }
 
+/**
+ * Creates a point light with the specified parameters.
+ *
+ * @param {Object} light - The light object for creating the point light.
+ * @param {number} light.intensity - The intensity of the light.
+ * @param {number} light.decay - The decay of the light.
+ * @param {number} light.posX - The X position of the light.
+ * @param {number} light.posY - The Y position of the light.
+ * @param {number} light.posZ - The Z position of the light.
+ * @param {number} light.R - The red component of the light's color.
+ * @param {number} light.G - The green component of the light's color.
+ * @param {number} light.B - The blue component of the light's color.
+ */
 function createPointLight({ intensity, decay, posX, posY, posZ, R, G, B }) {
   const color = rgbToHex(R, G, B);
   const newPointLight = new THREE.PointLight(color);
@@ -1108,9 +1215,9 @@ function createPointLight({ intensity, decay, posX, posY, posZ, R, G, B }) {
   createLightSphere(newPointLight.position, color);
 }
 
-// *************
-// *** SPOT ****
-// *************
+// ***************
+// * SPOT LIGHTS *
+// ***************
 document
   .getElementById("addSpotLightForm")
   .addEventListener("submit", (event) => {
@@ -1128,6 +1235,11 @@ document
     scene.remove(lightCone);
   });
 
+/**
+ * Retrieves the values from the form inputs related to the spot light and returns them as an object.
+ *
+ * @returns {Object} An object containing the spot light properties.
+ */
 function getFormSpotLight() {
   const intensity = document.getElementById("spotLightIntensity").value;
   const posX = document.getElementById("spotLightPosX").value;
@@ -1160,6 +1272,24 @@ function getFormSpotLight() {
   };
 }
 
+/**
+ * Creates a spot light with the specified parameters.
+ *
+ * @param {Object} light - The light object for creating the spot light.
+ * @param {number} light.intensity - The intensity of the spot light.
+ * @param {number} light.angle - The angle of the spot light.
+ * @param {number} light.penumbra - The penumbra of the spot light.
+ * @param {number} light.decay - The decay of the spot light.
+ * @param {number} light.dirX - The X direction of the spot light.
+ * @param {number} light.dirY - The Y direction of the spot light.
+ * @param {number} light.dirZ - The Z direction of the spot light.
+ * @param {number} light.posX - The X position of the spot light.
+ * @param {number} light.posY - The Y position of the spot light.
+ * @param {number} light.posZ - The Z position of the spot light.
+ * @param {number} light.R - The red component of the spot light color.
+ * @param {number} light.G - The green component of the spot light color.
+ * @param {number} light.B - The blue component of the spot light color.
+ */
 function createSpotLight({
   intensity,
   angle,
@@ -1197,7 +1327,9 @@ function createSpotLight({
   createSpotLightCone(newSpotLight, color);
 }
 
-// Função de animação
+// **************************
+// * MAIN PROGRAM (KIND OF) *
+// **************************
 function animate() {
   requestAnimationFrame(animate);
   renderer.render(scene, camera);
