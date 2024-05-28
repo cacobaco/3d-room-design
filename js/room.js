@@ -302,15 +302,15 @@ function parsePrimitive(
   return {
     id: parsedId,
     type,
-    height: parseFloat(height) || 1,
-    width: parseFloat(width) || 1,
-    depth: parseFloat(depth) || 1,
-    initialX: parseFloat(initialX) || 0,
-    initialY: parseFloat(initialY) || height / 2,
-    initialZ: parseFloat(initialZ) || 0,
-    rotationX: parseFloat(rotationX) || 0,
-    rotationY: parseFloat(rotationY) || 0,
-    rotationZ: parseFloat(rotationZ) || 0,
+    height: height ? parseFloat(height) : 1,
+    width: width ? parseFloat(width) : 1,
+    depth: depth ? parseFloat(depth) : 1,
+    initialX: initialX ? parseFloat(initialX) : 0,
+    initialY: initialY ? parseFloat(initialY) : height / 2,
+    initialZ: initialZ ? parseFloat(initialZ) : 0,
+    rotationX: rotationX ? parseFloat(rotationX) : 0,
+    rotationY: rotationY ? parseFloat(rotationY) : 0,
+    rotationZ: rotationZ ? parseFloat(rotationZ) : 0,
     attribute,
     attributeValue,
   };
@@ -424,15 +424,15 @@ function getPrimitiveMaterial({ attribute, attributeValue }) {
 function isPrimitiveInsideRoom({ mesh }) {
   const box = new THREE.Box3().setFromObject(mesh);
 
-  if (box.min.x < -5 || box.max.x > 5) {
+  if (box.min.x <= -5 || box.max.x >= 5) {
     return false;
   }
 
-  if (box.min.y < 0 || box.max.y > 10) {
+  if (box.min.y <= 0 || box.max.y >= 10) {
     return false;
   }
 
-  if (box.min.z < -5 || box.max.z > 5) {
+  if (box.min.z <= -5 || box.max.z >= 5) {
     return false;
   }
 
@@ -588,15 +588,15 @@ function parseModel(
 
   return {
     id: parsedId,
-    height: parseFloat(height) || 1,
-    width: parseFloat(width) || 1,
-    depth: parseFloat(depth) || 1,
-    initialX: parseFloat(initialX) || 0,
-    initialY: parseFloat(initialY) || height / 2,
-    initialZ: parseFloat(initialZ) || 0,
-    rotationX: parseFloat(rotationX) || 0,
-    rotationY: parseFloat(rotationY) || 0,
-    rotationZ: parseFloat(rotationZ) || 0,
+    height: height ? parseFloat(height) : 1,
+    width: width ? parseFloat(width) : 1,
+    depth: depth ? parseFloat(depth) : 1,
+    initialX: initialX ? parseFloat(initialX) : 0,
+    initialY: initialY ? parseFloat(initialY) : 1,
+    initialZ: initialZ ? parseFloat(initialZ) : 0,
+    rotationX: rotationX ? parseFloat(rotationX) : 0,
+    rotationY: rotationY ? parseFloat(rotationY) : 0,
+    rotationZ: rotationZ ? parseFloat(rotationZ) : 0,
     file,
     fileName,
     texture,
@@ -635,23 +635,14 @@ function createModel(model) {
       THREE.MathUtils.degToRad(model.rotationZ)
     );
 
-    const height = model.height / 10;
-    const width = model.width / 10;
-    const depth = model.depth / 10;
-
     const boundingBox = new THREE.Box3().setFromObject(object);
     const modelSize = boundingBox.getSize(new THREE.Vector3());
-    const roomSize = new THREE.Vector3(10, 10, 10);
 
-    const scaleFactorX = roomSize.x / modelSize.x;
-    const scaleFactorY = roomSize.y / modelSize.y;
-    const scaleFactorZ = roomSize.z / modelSize.z;
+    const widthScale = model.width / modelSize.x;
+    const heightScale = model.height / modelSize.y;
+    const depthScale = model.depth / modelSize.z;
 
-    object.scale.set(
-      scaleFactorX * height,
-      scaleFactorY * width,
-      scaleFactorZ * depth
-    );
+    object.scale.set(widthScale, heightScale, depthScale);
 
     model.object = object;
 
@@ -704,15 +695,15 @@ function deleteModel(id) {
 function isModelInsideRoom({ object }) {
   const box = new THREE.Box3().setFromObject(object);
 
-  if (box.min.x < -5 || box.max.x > 5) {
+  if (box.min.x <= -5 || box.max.x >= 5) {
     return false;
   }
 
-  if (box.min.y < 0 || box.max.y > 10) {
+  if (box.min.y <= 0 || box.max.y >= 10) {
     return false;
   }
 
-  if (box.min.z < -5 || box.max.z > 5) {
+  if (box.min.z <= -5 || box.max.z >= 5) {
     return false;
   }
 
@@ -739,6 +730,11 @@ export function handleManipulateObjectButtonClick() {
 
   if (!primitives[id] && !models[id]) {
     showErrorModal("Erro", `Não existe um objeto com o id "${id}".`);
+    return;
+  }
+
+  if (selectedObject && selectedObject.id === id) {
+    deselectObject();
     return;
   }
 
