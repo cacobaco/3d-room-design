@@ -742,6 +742,11 @@ export function handleManipulateObjectButtonClick() {
     return;
   }
 
+  if (selectedObject && selectedObject.id === id) {
+    deselectObject();
+    return;
+  }
+
   selectObject(id);
 }
 
