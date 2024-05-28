@@ -15,7 +15,8 @@
     <div class="ms-3 d-flex flex-column align-items-center justify-content-center h-100 w-100">
       <form id="primitiveForm" class="d-flex flex-column align-items-center justify-content-center">
         <div class="d-flex">
-          <select class="form-select mb-2 mt-3 border border-danger" id="primitiveType">
+          <select class="form-select mb-2 mt-3 border border-danger" id="primitiveType" required>
+            <option value="" selected>Selecione um tipo</option>
             <option value="box">Paralelipipedo</option>
             <option value="pyramid">Piramide quadrangular</option>
           </select>
@@ -45,21 +46,23 @@
         </div>
         <div class="d-flex justify-content-evenly">
           <div>
-            <input class="form-control mx-1" type="number" id="primitiveRotationX" name="primitiveRotationX" placeholder="RotX" style="width: 90px;" min="0" max="360">
+            <input class="form-control mx-1" type="number" id="primitiveRotationX" name="primitiveRotationX" placeholder="RotX" style="width: 90px;" min="-360" max="360">
           </div>
           <div>
-            <input class="form-control mx-1" type="number" id="primitiveRotationY" name="primitiveRotationY" placeholder="RotY" style="width: 90px;" min="0" max="360">
+            <input class="form-control mx-1" type="number" id="primitiveRotationY" name="primitiveRotationY" placeholder="RotY" style="width: 90px;" min="-360" max="360">
           </div>
           <div>
-            <input class="form-control mx-1" type="number" id="primitiveRotationZ" name="primitiveRotationZ" placeholder="RotZ" style="width: 90px;" min="0" max="360">
+            <input class="form-control mx-1" type="number" id="primitiveRotationZ" name="primitiveRotationZ" placeholder="RotZ" style="width: 90px;" min="-360" max="360">
           </div>
         </div>
         <div class="d-flex mt-2">
           <select id="primitiveAttribute" class="form-select mx-1 border border-danger" required>
+            <option value="" selected>Selecione um atributo</option>
             <option value="color">Cor</option>
             <option value="texture">Textura</option>
           </select>
-          <select id="primitiveColor" class="form-select mx-1 border border-danger" required>
+          <select id="primitiveColor" class="form-select mx-1 border border-danger" style="display: none;">
+            <option value="" selected>Selecione uma cor</option>
             <option value="red">Red</option>
             <option value="blue">Blue</option>
             <option value="yellow">Yellow</option>
@@ -71,7 +74,8 @@
             <option value="lime">Lime</option>
             <option value="pink">Pink</option>
           </select>
-          <select id="primitiveTexture" class="form-select mx-1 border border-danger" required style="display: none;">
+          <select id="primitiveTexture" class="form-select mx-1 border border-danger" style="display: none;">
+            <option value="" selected>Selecione uma textura</option>
             <option value="metal.jpg">Metal</option>
             <option value="box.png">Box</option>
             <option value="wood.jpg">Wood</option>
@@ -83,14 +87,14 @@
     </div>
     <!--Aqui div de adicionar modelo e manipular objeto-->
     <div class="menu-div ms-3 d-flex flex-column align-items-center justify-content-evenly h-100 w-100">
-      <form id="addModel" class="d-flex mt-3 flex-column align-items-center justify-content-center">
-        <input class="mb-3 form-control" type="file" id="file" name="file" accept=".obj">
-        <button type="submit" class="btn btn-primary mb-3">Adicionar Modelo</button>
+      <form id="modelForm" class="d-flex mt-3 flex-column align-items-center justify-content-center">
+        <input class="mb-3 form-control border border-danger" type="file" id="file" name="file" accept=".obj">
+        <button id="createModelButton" type="submit" class="btn btn-primary mb-3">Adicionar Modelo</button>
       </form>
     </div>
     <div class="menu-div ms-3 d-flex flex-column align-items-center justify-content-evenly h-100 w-100">
       <form id="manipulateObjectForm" class="d-flex flex-column align-items-center justify-content-center">
-        <select id="manipulableObjectId" class="form-select mb-3 mt-3 border border-danger">
+        <select id="manipulableObjectId" class="form-select mb-3 mt-3 border border-danger" required>
           <option value="" selected>Selecione um objeto</option>
         </select>
         <button id="manipulateObjectButton" type="button" class="btn btn-primary mb-3">Manipular Objeto</button>
@@ -116,13 +120,8 @@
     </div>
   </div>
 
-
-
   <canvas class="d-block border border-3 border-black" id="gl-canvas" width="800" height="800"></canvas>
 
-
-
-  <!--Aqui div de adicionar luz-->
   <div class="menu-div ms-3 d-flex flex-column align-items-center justify-content-center h-100" style="border-bottom: 2px solid rgb(215, 214, 214);">
     <small class="text-center">Campos a vermelho são obrigatórios.</small>
     <select id="lightType" class="form-select mt-3">
@@ -236,8 +235,6 @@
       </div>
     </form>
   </div>
-
-  
 
   <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
