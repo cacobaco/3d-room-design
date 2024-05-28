@@ -56,10 +56,15 @@ scene.add(floor);
 camera.position.set(5, 5, 15);
 camera.lookAt(0, 5, 0);
 
+
 // Variáveis para controle de movimento
 let moveSpeed = 0.1;
 const keysPressed = {};
-let storedObject = null;
+
+
+let storedObjects = {};
+let storedObject = {};
+let collisionObjects = [];
 
 document.getElementById("addModel").addEventListener("submit", function (event) {
   event.preventDefault();
@@ -91,14 +96,46 @@ document.getElementById("addModel").addEventListener("submit", function (event) 
       }
     });
 
+    // Get the initial position and rotation from the user's input
+    const initialX = parseFloat(document.getElementById("primitiveX").value) || 0;
+    const initialY = parseFloat(document.getElementById("primitiveY").value) || 0;
+    const initialZ = parseFloat(document.getElementById("primitiveZ").value) || 0;
+    const rotationX = parseFloat(document.getElementById("primitiveRotationX").value) || 0;
+    const rotationY = parseFloat(document.getElementById("primitiveRotationY").value) || 0;
+    const rotationZ = parseFloat(document.getElementById("primitiveRotationZ").value) || 0;
+    let height = parseFloat(document.getElementById("primitiveHeight").value) || 1;
+    let width = parseFloat(document.getElementById("primitiveWidth").value) || 1;
+    let depth = parseFloat(document.getElementById("primitiveDepth").value) || 1;
+
+    height=height/10;
+    width=width/10;
+    depth=depth/10;
+
+    // Set the initial position and rotation of the model
+    object.position.set(initialX, initialY, initialZ);
+    object.rotation.set(rotationX, rotationY, rotationZ);
+
+
     // Calculate the size of the model and the environment to adjust the size of the model
     const boundingBox = new THREE.Box3().setFromObject(object);
     const modelSize = boundingBox.getSize(new THREE.Vector3());
     const roomSize = new THREE.Vector3(10, 10, 10);
 
     // Assign a unique ID to the model
-    const userInput = document.getElementById("modelId").value;
+    const userInput = document.getElementById("primitiveId").value;
     const modelId = userInput;
+
+    // Check if an object with the same name already exists
+    if (scene.getObjectByName(modelId)) {
+      throw new Error(`Já existe um modelo com o id "${modelId}".`);
+      return;
+    }
+
+    if (primitives[modelId]) {
+      throw new Error(`Já existe uma primitiva com o id "${modelId}".`);
+      return;
+    }
+
     object.name = modelId;
     addManipulableObjectOption(object.name);
 
@@ -107,11 +144,14 @@ document.getElementById("addModel").addEventListener("submit", function (event) 
         roomSize.y / modelSize.y,
         roomSize.z / modelSize.z
     );
-    object.scale.set(scaleFactor * 0.3, scaleFactor * 0.3, scaleFactor * 0.3);
-
+    object.scale.set(scaleFactor * height, scaleFactor * width, scaleFactor * depth);
 
     // Store the object for later manipulation
     storedObject = object;
+
+    storedObjects[modelId] = object;
+
+    collisionObjects.push(object);
 
     scene.add(object);
   });
@@ -138,6 +178,7 @@ window.addEventListener("keyup", (event) => {
   if (event.key === "CapsLock" && selectedPrimitive) {
     primitiveCollisionsEnabled = !primitiveCollisionsEnabled;
   }
+
 });
 
 // Controle de movimento WASD
@@ -339,6 +380,11 @@ function parsePrimitive(
     throw new Error(`Já existe uma primitiva com o id "${parsedId}".`);
   }
 
+  // Check if the id matches the name of the storedObject
+  if (storedObject && parsedId === storedObject.name) {
+    throw new Error(`Já existe um modelo com o id "${parsedId}".`);
+  }
+
   return {
     id: parsedId,
     type,
@@ -477,7 +523,7 @@ export function onManipulateObjectButtonClick() {
     return;
   }
 
-  if (!primitives[id] && !storedObject) {
+  if (!primitives[id] && !storedObjects[id]) {
     showErrorModal("Erro", `Não existe uma primitiva com o id "${id}".`);
     return;
   }
@@ -545,7 +591,7 @@ function updateSelectedObject() {
   if (newBox.min.z < -5 || newBox.max.z > 5) {
     translation.z = 0;
   }
-console.log(primitiveCollisionsEnabled);
+  console.log(primitiveCollisionsEnabled);
   if (primitiveCollisionsEnabled) {
     for (const id in primitives) {
       if (id === selectedPrimitive.id) {
@@ -572,6 +618,8 @@ console.log(primitiveCollisionsEnabled);
 
 
 function updateStoredObject() {
+
+
   if (!storedObject) {
     return;
   }
@@ -621,7 +669,7 @@ function updateStoredObject() {
   if (newBox.min.z < -5 || newBox.max.z > 5) {
     translation.z = 0;
   }
-
+  console.log(primitiveCollisionsEnabled);
   // Check for collisions with other primitives
   if (primitiveCollisionsEnabled) {
     for (const id in primitives) {
@@ -635,6 +683,17 @@ function updateStoredObject() {
     }
   }
 
+  for (const obj of collisionObjects) {
+    if (obj === storedObject) continue;
+
+    const otherBox = new THREE.Box3().setFromObject(obj);
+
+    if (newBox.intersectsBox(otherBox)) {
+      translation.set(0, 0, 0);
+      break;
+    }
+  }
+
   if (translation.length() > 0) {
     storedObject.position.add(translation);
   }
@@ -644,11 +703,11 @@ function updateStoredObject() {
 
 
 function selectObject(id) {
+
   // Deselect the previously selected object, if any
   if (selectedPrimitive || selectedObject ) {
     deselectObject();
   }
-
   // Check if the id matches a primitive
   if (primitives[id]) {
     selectedPrimitive = primitives[id];
@@ -657,23 +716,19 @@ function selectObject(id) {
     updateSelectedManipulableObject(selectedPrimitive);
   }
   // Check if the id matches the name of the storedObject
-  if (storedObject && storedObject.name === id) {
-    selectedObject = storedObject;
-    //addBorder(selectedObject);
-    updateStoredObject(selectedObject.name);
-    updateSelectedManipulableObject(selectedObject);
-  }
+  else {
+      if (storedObjects[id]) {
+        selectedObject = storedObjects[id];
+        updateStoredObject();
+        updateSelectedManipulableObject(selectedObject);
+      }
+    }
 }
 
 function deselectObject() {
   if (selectedPrimitive) {
     removeBorder(selectedPrimitive.mesh);
     selectedPrimitive = null;
-  }
-
-  if (storedObject) {
-    // Add any necessary actions to deselect the storedObject
-    storedObject = null;
   }
 
   updateSelectedManipulableObject();
