@@ -424,15 +424,15 @@ function getPrimitiveMaterial({ attribute, attributeValue }) {
 function isPrimitiveInsideRoom({ mesh }) {
   const box = new THREE.Box3().setFromObject(mesh);
 
-  if (box.min.x <= -5 || box.max.x >= 5) {
+  if (box.min.x < -5 || box.max.x > 5) {
     return false;
   }
 
-  if (box.min.y <= 0 || box.max.y >= 10) {
+  if (box.min.y < 0 || box.max.y > 10) {
     return false;
   }
 
-  if (box.min.z <= -5 || box.max.z >= 5) {
+  if (box.min.z < -5 || box.max.z > 5) {
     return false;
   }
 
@@ -706,15 +706,15 @@ function deleteModel(id) {
 function isModelInsideRoom({ object }) {
   const box = new THREE.Box3().setFromObject(object);
 
-  if (box.min.x <= -5 || box.max.x >= 5) {
+  if (box.min.x < -5 || box.max.x > 5) {
     return false;
   }
 
-  if (box.min.y <= 0 || box.max.y >= 10) {
+  if (box.min.y < 0 || box.max.y > 10) {
     return false;
   }
 
-  if (box.min.z <= -5 || box.max.z >= 5) {
+  if (box.min.z < -5 || box.max.z > 5) {
     return false;
   }
 
