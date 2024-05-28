@@ -1069,20 +1069,35 @@ function createSpotLightCone(spotLight, color) {
 // **********************
 document
   .getElementById("addDirectionalLightForm")
-  .addEventListener("submit", (event) => {
-    event.preventDefault();
-    scene.remove(directionalLight);
-    const light = getFormLight();
-    createLight(light);
-  });
+  .addEventListener("submit", handleDirectionalLightFormSubmit);
+
+/**
+ * Handles the form submission for the directional light.
+ * Removes the existing directional light from the scene and creates a new one based on the form input.
+ *
+ * @param {Event} event - The form submission event.
+ */
+function handleDirectionalLightFormSubmit(event) {
+  event.preventDefault();
+  scene.remove(directionalLight);
+  const light = getFormLight();
+  createLight(light);
+}
 
 document
   .getElementById("resetDirectionalLightForm")
-  .addEventListener("submit", (event) => {
-    event.preventDefault();
-    scene.remove(directionalLight);
-    scene.remove(arrowHelper);
-  });
+  .addEventListener("submit", handleResetDirectionalLightFormSubmit);
+
+/**
+ * Handles the form submit event for resetting the directional light.
+ *
+ * @param {Event} event - The form submit event.
+ */
+function handleResetDirectionalLightFormSubmit(event) {
+  event.preventDefault();
+  scene.remove(directionalLight);
+  scene.remove(arrowHelper);
+}
 
 /**
  * Retrieves the form values for light position, direction, and color.
@@ -1151,19 +1166,34 @@ function createLight({ posX, posY, posZ, dirX, dirY, dirZ, R, G, B }) {
 // ******************
 document
   .getElementById("addAmbientLightForm")
-  .addEventListener("submit", (event) => {
-    event.preventDefault();
-    scene.remove(ambientLight);
-    const light = getFormAmbientLight();
-    createAmbientLight(light);
-  });
+  .addEventListener("submit", handleAmbientLightFormSubmit);
+
+/**
+ * Handles the form submission for ambient light settings.
+ * Removes the existing ambient light from the scene and creates a new one based on the form input.
+ *
+ * @param {Event} event - The form submission event.
+ */
+function handleAmbientLightFormSubmit(event) {
+  event.preventDefault();
+  scene.remove(ambientLight);
+  const light = getFormAmbientLight();
+  createAmbientLight(light);
+}
 
 document
   .getElementById("resetAmbientLightForm")
-  .addEventListener("submit", (event) => {
-    event.preventDefault();
-    scene.remove(ambientLight);
-  });
+  .addEventListener("submit", handleResetAmbientLightFormSubmit);
+
+/**
+ * Handles the form submission for resetting the ambient light.
+ *
+ * @param {Event} event - The form submission event.
+ */
+function handleResetAmbientLightFormSubmit(event) {
+  event.preventDefault();
+  scene.remove(ambientLight);
+}
 
 /**
  * Retrieves the values of the ambient light form inputs.
@@ -1205,20 +1235,36 @@ function createAmbientLight({ intensity, R, G, B }) {
 // ****************
 document
   .getElementById("addPointLightForm")
-  .addEventListener("submit", (event) => {
-    event.preventDefault();
-    scene.remove(pointLight);
-    const light = getFormPointLight();
-    createPointLight(light);
-  });
+  .addEventListener("submit", handlePointLightFormSubmit);
+
+/**
+ * Handles the form submission for the point light.
+ * Removes the existing point light from the scene and creates a new point light based on the form input.
+ *
+ * @param {Event} event - The form submit event.
+ */
+function handlePointLightFormSubmit(event) {
+  event.preventDefault();
+  scene.remove(pointLight);
+  const light = getFormPointLight();
+  createPointLight(light);
+}
 
 document
   .getElementById("resetPointLightForm")
-  .addEventListener("submit", (event) => {
-    event.preventDefault();
-    scene.remove(pointLight);
-    scene.remove(sphere);
-  });
+  .addEventListener("submit", handleResetPointLightFormSubmit);
+
+/**
+ * Handles the form submission for resetting the point light.
+ * Removes the point light and sphere from the scene.
+ *
+ * @param {Event} event - The form submit event.
+ */
+function handleResetPointLightFormSubmit(event) {
+  event.preventDefault();
+  scene.remove(pointLight);
+  scene.remove(sphere);
+}
 
 /**
  * Retrieves the values from the form inputs and returns an object containing the point light properties.
@@ -1281,20 +1327,36 @@ function createPointLight({ intensity, decay, posX, posY, posZ, R, G, B }) {
 // ***************
 document
   .getElementById("addSpotLightForm")
-  .addEventListener("submit", (event) => {
-    event.preventDefault();
-    scene.remove(spotLight);
-    const light = getFormSpotLight();
-    createSpotLight(light);
-  });
+  .addEventListener("submit", handleSpotLightFormSubmit);
+
+/**
+ * Handles the form submission for the spot light.
+ * Removes the existing spot light from the scene and creates a new spot light based on the form input.
+ *
+ * @param {Event} event - The form submission event.
+ */
+function handleSpotLightFormSubmit(event) {
+  event.preventDefault();
+  scene.remove(spotLight);
+  const light = getFormSpotLight();
+  createSpotLight(light);
+}
 
 document
   .getElementById("resetSpotLightForm")
-  .addEventListener("submit", (event) => {
-    event.preventDefault();
-    scene.remove(spotLight);
-    scene.remove(lightCone);
-  });
+  .addEventListener("submit", handleResetSpotLightFormSubmit);
+
+/**
+ * Handles the form submit event for resetting the spot light.
+ * Removes the spot light and light cone from the scene.
+ *
+ * @param {Event} event - The form submit event.
+ */
+function handleResetSpotLightFormSubmit(event) {
+  event.preventDefault();
+  scene.remove(spotLight);
+  scene.remove(lightCone);
+}
 
 /**
  * Retrieves the values from the form inputs related to the spot light and returns them as an object.
