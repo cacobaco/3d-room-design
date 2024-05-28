@@ -59,6 +59,7 @@ camera.lookAt(0, 5, 0);
 // Variáveis para controle de movimento
 let moveSpeed = 0.1;
 const keysPressed = {};
+let storedObject = null;
 
 document
   .getElementById("addModel")
@@ -71,24 +72,53 @@ document
     const file = fileInput.files[0];
     const reader = new FileReader();
 
+    // Extract the filename without extension
+    const filename = file.name.split(".").slice(0, -1).join(".");
+
+    // Load the texture based on the filename
+    const texture = new THREE.TextureLoader().load(
+      `../modelos/${filename}_texture.png`
+    );
+
     reader.addEventListener("load", function (event) {
-      // Parse the file content and load the model
       const contents = event.target.result;
       const object = loader.parse(contents);
 
-      // calcula o tamanho do modelo e do ambiente para ajustar o tamanho do modelo
+      object.traverse(function (child) {
+        if (child instanceof THREE.Mesh) {
+          child.castShadow = true;
+          child.receiveShadow = true;
+
+          // Apply the texture to the material of the mesh
+          child.material.map = texture;
+          child.material.needsUpdate = true;
+        }
+      });
+
+      // Calculate the size of the model and the environment to adjust the size of the model
       const boundingBox = new THREE.Box3().setFromObject(object);
       const modelSize = boundingBox.getSize(new THREE.Vector3());
       const roomSize = new THREE.Vector3(10, 10, 10);
+
+      // Assign a unique ID to the model
+      const userInput = document.getElementById("modelId").value;
+      const modelId = userInput;
+      object.name = modelId;
+      addManipulableObjectOption(object.name);
 
       const scaleFactor = Math.min(
         roomSize.x / modelSize.x,
         roomSize.y / modelSize.y,
         roomSize.z / modelSize.z
       );
-      object.scale.set(scaleFactor, scaleFactor, scaleFactor);
+      object.scale.set(scaleFactor * 0.3, scaleFactor * 0.3, scaleFactor * 0.3);
+
+      // Store the object for later manipulation
+      storedObject = object;
+
       scene.add(object);
     });
+
     reader.readAsText(file);
   });
 
@@ -439,20 +469,20 @@ function isPrimitiveInsideRoom(primitive) {
 // * PRIMITIVES MANIPULATION *
 // ***************************
 let selectedPrimitive = null;
+let selectedObject = null;
+
 let primitiveCollisionsEnabled = false;
 
 export function onManipulateObjectButtonClick() {
   const id = document.getElementById("manipulableObjectId").value;
-
   if (!id) {
     return;
   }
 
-  if (!primitives[id]) {
+  if (!primitives[id] && !storedObject) {
     showErrorModal("Erro", `Não existe uma primitiva com o id "${id}".`);
     return;
   }
-
   selectObject(id);
 }
 
@@ -516,7 +546,7 @@ function updateSelectedObject() {
   if (newBox.min.z < -5 || newBox.max.z > 5) {
     translation.z = 0;
   }
-
+  console.log(primitiveCollisionsEnabled);
   if (primitiveCollisionsEnabled) {
     for (const id in primitives) {
       if (id === selectedPrimitive.id) {
@@ -540,30 +570,109 @@ function updateSelectedObject() {
   requestAnimationFrame(updateSelectedObject);
 }
 
-function selectObject(id) {
-  if (!primitives[id]) {
-    throw new Error(`Não existe uma primitiva com o id "${id}".`);
-  }
-
-  if (selectedPrimitive) {
-    deselectObject();
-  }
-
-  selectedPrimitive = primitives[id];
-  addBorder(selectedPrimitive.mesh);
-
-  updateSelectedObject(selectedPrimitive.id);
-
-  updateSelectedManipulableObject(selectedPrimitive);
-}
-
-function deselectObject() {
-  if (!selectedPrimitive) {
+function updateStoredObject() {
+  if (!storedObject) {
     return;
   }
 
-  removeBorder(selectedPrimitive.mesh);
-  selectedPrimitive = null;
+  if (keysPressed["enter"]) {
+    deselectObject();
+    return;
+  }
+
+  if (keysPressed["delete"] || keysPressed["backspace"]) {
+    deletePrimitive(storedObject.id);
+    return;
+  }
+
+  const translation = new THREE.Vector3();
+
+  if (keysPressed["arrowup"]) {
+    translation.z -= 0.05;
+  }
+  if (keysPressed["arrowdown"]) {
+    translation.z += 0.05;
+  }
+  if (keysPressed["arrowleft"]) {
+    translation.x -= 0.05;
+  }
+  if (keysPressed["arrowright"]) {
+    translation.x += 0.05;
+  }
+  if (keysPressed["pageup"]) {
+    translation.y += 0.05;
+  }
+  if (keysPressed["pagedown"]) {
+    translation.y -= 0.05;
+  }
+
+  const box = new THREE.Box3().setFromObject(storedObject);
+  const newBox = box.clone().translate(translation);
+
+  if (newBox.min.x < -5 || newBox.max.x > 5) {
+    translation.x = 0;
+  }
+
+  if (newBox.min.y < 0 || newBox.max.y > 10) {
+    translation.y = 0;
+  }
+
+  if (newBox.min.z < -5 || newBox.max.z > 5) {
+    translation.z = 0;
+  }
+
+  // Check for collisions with other primitives
+  if (primitiveCollisionsEnabled) {
+    for (const id in primitives) {
+      const primitive = primitives[id];
+      const otherBox = new THREE.Box3().setFromObject(primitive.mesh);
+
+      if (newBox.intersectsBox(otherBox)) {
+        translation.set(0, 0, 0);
+        break;
+      }
+    }
+  }
+
+  if (translation.length() > 0) {
+    storedObject.position.add(translation);
+  }
+
+  requestAnimationFrame(updateStoredObject);
+}
+
+function selectObject(id) {
+  // Deselect the previously selected object, if any
+  if (selectedPrimitive || selectedObject) {
+    deselectObject();
+  }
+
+  // Check if the id matches a primitive
+  if (primitives[id]) {
+    selectedPrimitive = primitives[id];
+    addBorder(selectedPrimitive.mesh);
+    updateSelectedObject(selectedPrimitive.id);
+    updateSelectedManipulableObject(selectedPrimitive);
+  }
+  // Check if the id matches the name of the storedObject
+  if (storedObject && storedObject.name === id) {
+    selectedObject = storedObject;
+    //addBorder(selectedObject);
+    updateStoredObject(selectedObject.name);
+    updateSelectedManipulableObject(selectedObject);
+  }
+}
+
+function deselectObject() {
+  if (selectedPrimitive) {
+    removeBorder(selectedPrimitive.mesh);
+    selectedPrimitive = null;
+  }
+
+  if (storedObject) {
+    // Add any necessary actions to deselect the storedObject
+    storedObject = null;
+  }
 
   updateSelectedManipulableObject();
 }
@@ -579,7 +688,6 @@ function addBorder(mesh) {
 function removeBorder(mesh) {
   mesh.remove(mesh.children.find((child) => child.isLineSegments));
 }
-
 // **********
 // * LIGHTS *
 // **********
