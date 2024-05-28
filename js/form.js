@@ -92,18 +92,18 @@ export function updateSelectedManipulableObject(primitive = undefined) {
 }
 
 document
-    .getElementById("manipulateObjectButton")
-    .addEventListener("click", onManipulateObjectButtonClick);
+  .getElementById("manipulateObjectButton")
+  .addEventListener("click", onManipulateObjectButtonClick);
 document
-    .getElementById("deleteObjectButton")
-    .addEventListener("click", onDeleteObjectButtonClick);
+  .getElementById("deleteObjectButton")
+  .addEventListener("click", onDeleteObjectButtonClick);
 
 const lightSelect = document.getElementById("lightType");
 const addDirectionalLightForm = document.getElementById(
-    "addDirectionalLightForm"
+  "addDirectionalLightForm"
 );
 const resetDirectionalLightForm = document.getElementById(
-    "resetDirectionalLightForm"
+  "resetDirectionalLightForm"
 );
 const addAmbientLightForm = document.getElementById("addAmbientLightForm");
 const resetAmbientLightForm = document.getElementById("resetAmbientLightForm");
