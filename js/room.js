@@ -65,14 +65,18 @@ document.getElementById("addModel").addEventListener("submit", function (event) 
   event.preventDefault();
 
   const loader = new OBJLoader();
-  const texture = new THREE.TextureLoader().load('../modelos/Astronaut.png');
 
   const fileInput = document.getElementById("file");
   const file = fileInput.files[0];
   const reader = new FileReader();
 
+  // Extract the filename without extension
+  const filename = file.name.split('.').slice(0, -1).join('.');
+
+  // Load the texture based on the filename
+  const texture = new THREE.TextureLoader().load(`../modelos/${filename}_texture.png`);
+
   reader.addEventListener("load", function (event) {
-    // Parse the file content and load the model
     const contents = event.target.result;
     const object = loader.parse(contents);
 
