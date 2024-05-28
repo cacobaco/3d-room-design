@@ -323,14 +323,6 @@ function parsePrimitive(
  * @param {Primitive} primitive - The primitive object.
  */
 function createPrimitive(primitive) {
-  if (primitives[primitive.id]) {
-    deletePrimitive(primitive.id);
-  }
-
-  if (models[primitive.id]) {
-    deleteModel(primitive.id);
-  }
-
   const geometry = getPrimitiveGeometry(primitive);
   const material = getPrimitiveMaterial(primitive);
   const mesh = new THREE.Mesh(geometry, material);
@@ -346,14 +338,21 @@ function createPrimitive(primitive) {
   );
 
   primitive.mesh = mesh;
-  primitives[primitive.id] = primitive;
 
   if (!isPrimitiveInsideRoom(primitive)) {
-    delete primitives[primitive.id];
     showErrorModal("Erro", "A primitiva não pode ser criada fora da sala.");
     return;
   }
 
+  if (primitives[primitive.id]) {
+    deletePrimitive(primitive.id);
+  }
+
+  if (models[primitive.id]) {
+    deleteModel(primitive.id);
+  }
+
+  primitives[primitive.id] = primitive;
   scene.add(mesh);
   addManipulableObjectOption(primitive.id);
 }
@@ -611,14 +610,6 @@ function parseModel(
  * @param {Model} model - The model object.
  */
 function createModel(model) {
-  if (models[model.id]) {
-    deleteModel(model.id);
-  }
-
-  if (primitives[model.id]) {
-    deletePrimitive(model.id);
-  }
-
   const reader = new FileReader();
   reader.addEventListener("load", function (event) {
     const contents = event.target.result;
@@ -663,14 +654,21 @@ function createModel(model) {
     );
 
     model.object = object;
-    models[model.id] = model;
 
     if (!isModelInsideRoom(model)) {
-      delete models[model.id];
       showErrorModal("Erro", "O modelo não pode ser criado fora da sala.");
       return;
     }
 
+    if (models[model.id]) {
+      deleteModel(model.id);
+    }
+
+    if (primitives[model.id]) {
+      deletePrimitive(model.id);
+    }
+
+    models[model.id] = model;
     scene.add(object);
     addManipulableObjectOption(model.id);
   });
