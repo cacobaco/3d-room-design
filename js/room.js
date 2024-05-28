@@ -302,15 +302,15 @@ function parsePrimitive(
   return {
     id: parsedId,
     type,
-    height: parseFloat(height) || 1,
-    width: parseFloat(width) || 1,
-    depth: parseFloat(depth) || 1,
-    initialX: parseFloat(initialX) || 0,
-    initialY: parseFloat(initialY) || height / 2,
-    initialZ: parseFloat(initialZ) || 0,
-    rotationX: parseFloat(rotationX) || 0,
-    rotationY: parseFloat(rotationY) || 0,
-    rotationZ: parseFloat(rotationZ) || 0,
+    height: height ? parseFloat(height) : 1,
+    width: width ? parseFloat(width) : 1,
+    depth: depth ? parseFloat(depth) : 1,
+    initialX: initialX ? parseFloat(initialX) : 0,
+    initialY: initialY ? parseFloat(initialY) : height / 2,
+    initialZ: initialZ ? parseFloat(initialZ) : 0,
+    rotationX: rotationX ? parseFloat(rotationX) : 0,
+    rotationY: rotationY ? parseFloat(rotationY) : 0,
+    rotationZ: rotationZ ? parseFloat(rotationZ) : 0,
     attribute,
     attributeValue,
   };
@@ -323,14 +323,6 @@ function parsePrimitive(
  * @param {Primitive} primitive - The primitive object.
  */
 function createPrimitive(primitive) {
-  if (primitives[primitive.id]) {
-    deletePrimitive(primitive.id);
-  }
-
-  if (models[primitive.id]) {
-    deleteModel(primitive.id);
-  }
-
   const geometry = getPrimitiveGeometry(primitive);
   const material = getPrimitiveMaterial(primitive);
   const mesh = new THREE.Mesh(geometry, material);
@@ -346,14 +338,21 @@ function createPrimitive(primitive) {
   );
 
   primitive.mesh = mesh;
-  primitives[primitive.id] = primitive;
 
   if (!isPrimitiveInsideRoom(primitive)) {
-    delete primitives[primitive.id];
     showErrorModal("Erro", "A primitiva não pode ser criada fora da sala.");
     return;
   }
 
+  if (primitives[primitive.id]) {
+    deletePrimitive(primitive.id);
+  }
+
+  if (models[primitive.id]) {
+    deleteModel(primitive.id);
+  }
+
+  primitives[primitive.id] = primitive;
   scene.add(mesh);
   addManipulableObjectOption(primitive.id);
 }
@@ -462,12 +461,23 @@ function isPrimitiveInsideRoom({ mesh }) {
  * @property {THREE.Object3D | undefined} object - The object of the model.
  */
 
+const maxModels = 5;
 const models = {};
 
 document
   .getElementById("modelForm")
   .addEventListener("submit", function (event) {
     event.preventDefault();
+
+    const count = Object.keys(models).length;
+
+    if (count >= maxModels) {
+      showErrorModal(
+        "Erro",
+        `O número máximo de modelos foi atingido (${count}/${maxModels}).`
+      );
+      return;
+    }
 
     const isUpdate =
       document.getElementById("createModelButton").textContent ===
@@ -589,15 +599,15 @@ function parseModel(
 
   return {
     id: parsedId,
-    height: parseFloat(height) || 1,
-    width: parseFloat(width) || 1,
-    depth: parseFloat(depth) || 1,
-    initialX: parseFloat(initialX) || 0,
-    initialY: parseFloat(initialY) || height / 2,
-    initialZ: parseFloat(initialZ) || 0,
-    rotationX: parseFloat(rotationX) || 0,
-    rotationY: parseFloat(rotationY) || 0,
-    rotationZ: parseFloat(rotationZ) || 0,
+    height: height ? parseFloat(height) : 1,
+    width: width ? parseFloat(width) : 1,
+    depth: depth ? parseFloat(depth) : 1,
+    initialX: initialX ? parseFloat(initialX) : 0,
+    initialY: initialY ? parseFloat(initialY) : 1,
+    initialZ: initialZ ? parseFloat(initialZ) : 0,
+    rotationX: rotationX ? parseFloat(rotationX) : 0,
+    rotationY: rotationY ? parseFloat(rotationY) : 0,
+    rotationZ: rotationZ ? parseFloat(rotationZ) : 0,
     file,
     fileName,
     texture,
@@ -611,14 +621,6 @@ function parseModel(
  * @param {Model} model - The model object.
  */
 function createModel(model) {
-  if (models[model.id]) {
-    deleteModel(model.id);
-  }
-
-  if (primitives[model.id]) {
-    deletePrimitive(model.id);
-  }
-
   const reader = new FileReader();
   reader.addEventListener("load", function (event) {
     const contents = event.target.result;
@@ -644,33 +646,31 @@ function createModel(model) {
       THREE.MathUtils.degToRad(model.rotationZ)
     );
 
-    const height = model.height / 10;
-    const width = model.width / 10;
-    const depth = model.depth / 10;
-
     const boundingBox = new THREE.Box3().setFromObject(object);
     const modelSize = boundingBox.getSize(new THREE.Vector3());
-    const roomSize = new THREE.Vector3(10, 10, 10);
 
-    const scaleFactorX = roomSize.x / modelSize.x;
-    const scaleFactorY = roomSize.y / modelSize.y;
-    const scaleFactorZ = roomSize.z / modelSize.z;
+    const widthScale = model.width / modelSize.x;
+    const heightScale = model.height / modelSize.y;
+    const depthScale = model.depth / modelSize.z;
 
-    object.scale.set(
-      scaleFactorX * height,
-      scaleFactorY * width,
-      scaleFactorZ * depth
-    );
+    object.scale.set(widthScale, heightScale, depthScale);
 
     model.object = object;
-    models[model.id] = model;
 
     if (!isModelInsideRoom(model)) {
-      delete models[model.id];
       showErrorModal("Erro", "O modelo não pode ser criado fora da sala.");
       return;
     }
 
+    if (models[model.id]) {
+      deleteModel(model.id);
+    }
+
+    if (primitives[model.id]) {
+      deletePrimitive(model.id);
+    }
+
+    models[model.id] = model;
     scene.add(object);
     addManipulableObjectOption(model.id);
   });
@@ -741,6 +741,11 @@ export function handleManipulateObjectButtonClick() {
 
   if (!primitives[id] && !models[id]) {
     showErrorModal("Erro", `Não existe um objeto com o id "${id}".`);
+    return;
+  }
+
+  if (selectedObject && selectedObject.id === id) {
+    deselectObject();
     return;
   }
 
